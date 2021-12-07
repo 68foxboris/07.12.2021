@@ -80,7 +80,7 @@ void eActionMap::unbindAction(const std::string &context, ePyObject function)
 {
 	//eDebug("[eActionMap] unbind function from %s", context.c_str());
 	for (std::multimap<int64_t, eActionBinding>::iterator i(m_bindings.begin()); i != m_bindings.end(); ++i)
-		if (i->second.m_fnc && (PyObject_Compare(i->second.m_fnc, function) == 0))
+		if (i->second.m_fnc && (PyObject_RichCompareBool(i->second.m_fnc, function, Py_EQ) == 1))
 		{
 			Py_DECREF(i->second.m_fnc);
 			m_bindings.erase(i);
@@ -129,7 +129,7 @@ void eActionMap::unbindPythonKey(const std::string &context, int key, const std:
 	{
 		if (i->first == context && !strcmp(i->second.m_action.c_str(), action.c_str()) && i->second.m_key == key)
 		{
-			eDebug("[eActionMap] unbindPythonKey %d context %s action %s.", key, context.c_str(), action.c_str());
+			//eDebug("[eActionMap] unbindPythonKey %d context %s action %s.", key, context.c_str(), action.c_str());
 			m_python_keys.erase(i);
 			i = m_python_keys.begin();
 		}
