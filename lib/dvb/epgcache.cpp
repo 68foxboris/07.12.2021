@@ -20,6 +20,8 @@
 #include <dvbsi++/content_identifier_descriptor.h>
 #include <dvbsi++/descriptor_tag.h>
 
+#include <Python.h>
+
 /* Interval between "garbage collect" cycles */
 #define CLEAN_INTERVAL 60000    //  1 min
 
@@ -407,7 +409,7 @@ static pthread_mutex_t cache_lock =
 DEFINE_REF(eEPGCache)
 
 eEPGCache::eEPGCache()
-	:messages(this,1), m_running(false), m_enabledEpgSources(0), cleanTimer(eTimer::create(this)), m_timeQueryRef(nullptr)
+	:messages(this,1, "eEPGCache"), m_running(false), m_enabledEpgSources(0), cleanTimer(eTimer::create(this)), m_timeQueryRef(nullptr)
 {
 	eDebug("[eEPGCache] Initialized EPGCache (wait for setCacheFile call now)");
 
@@ -1725,7 +1727,11 @@ int handleEvent(eServiceEvent *ptr, ePyObject dest_list, const char* argstring, 
 PyObject *eEPGCache::lookupEvent(ePyObject list, ePyObject convertFunc)
 {
 	ePyObject convertFuncArgs;
+#if PY_MAJOR_VERSION < 3
 	int argcount=0;
+#else
+	ssize_t argcount=0;
+#endif
 	const char *argstring=NULL;
 	if (!PyList_Check(list))
 	{
@@ -2185,7 +2191,11 @@ unsigned int eEPGCache::getEpgmaxdays()
 
 static const char* getStringFromPython(ePyObject obj)
 {
+#if PY_MAJOR_VERSION < 3
 	char *result = 0;
+#else
+	const char *result = 0;
+#endif
 	if (PyString_Check(obj))
 	{
 		result = PyString_AS_STRING(obj);
@@ -2193,6 +2203,8 @@ static const char* getStringFromPython(ePyObject obj)
 	return result;
 }
 
+/** @copydoc eEPGCache::importEvents
+ */
 void eEPGCache::importEvent(ePyObject serviceReference, ePyObject list)
 {
 	importEvents(serviceReference, list);
@@ -2225,7 +2237,11 @@ void eEPGCache::importEvents(ePyObject serviceReferences, ePyObject list)
 
 	if (PyString_Check(serviceReferences))
 	{
+#if PY_MAJOR_VERSION < 3
 		char *refstr;
+#else
+		const char *refstr;
+#endif
 		refstr = PyString_AS_STRING(serviceReferences);
 	        if (!refstr)
 	        {
@@ -2254,7 +2270,11 @@ void eEPGCache::importEvents(ePyObject serviceReferences, ePyObject list)
 			PyObject* item = PyList_GET_ITEM(serviceReferences, i);
 			if (PyString_Check(item))
 			{
+#if PY_MAJOR_VERSION < 3
 				char *refstr;
+#else
+				const char *refstr;
+#endif
 				refstr = PyString_AS_STRING(item);
 				if (!refstr)
 				{
@@ -2375,8 +2395,13 @@ PyObject *eEPGCache::search(ePyObject arg)
 	std::deque<uint32_t> descr;
 	int eventid = -1;
 	const char *argstring=0;
+#if PY_MAJOR_VERSION < 3
 	char *refstr=0;
 	int argcount=0;
+#else
+	const char *refstr=0;
+	ssize_t argcount=0;
+#endif
 	int querytype=-1;
 	bool needServiceEvent=false;
 	int maxmatches=0;
@@ -2391,12 +2416,12 @@ PyObject *eEPGCache::search(ePyObject arg)
 			ePyObject obj = PyTuple_GET_ITEM(arg,0);
 			if (PyString_Check(obj))
 			{
-#if PY_VERSION_HEX < 0x02060000
-				argcount = PyString_GET_SIZE(obj);
-#else
+#if PY_MAJOR_VERSION < 3
 				argcount = PyString_Size(obj);
-#endif
 				argstring = PyString_AS_STRING(obj);
+#else
+				argstring = PyUnicode_AsUTF8AndSize(obj, &argcount);
+#endif
 				for (int i=0; i < argcount; ++i)
 					switch(argstring[i])
 					{
@@ -2438,7 +2463,11 @@ PyObject *eEPGCache::search(ePyObject arg)
 				ePyObject obj = PyTuple_GET_ITEM(arg, 3);
 				if (PyString_Check(obj))
 				{
+#if PY_MAJOR_VERSION < 3
 					refstr = PyString_AS_STRING(obj);
+#else
+					const char *refstr = PyString_AS_STRING(obj);
+#endif
 					eServiceReferenceDVB ref(refstr);
 					if (ref.valid())
 					{
@@ -2492,10 +2521,10 @@ PyObject *eEPGCache::search(ePyObject arg)
 				{
 					int casetype = PyLong_AsLong(PyTuple_GET_ITEM(arg, 4));
 					const char *str = PyString_AS_STRING(obj);
-#if PY_VERSION_HEX < 0x02060000
-					int strlen = PyString_GET_SIZE(obj);
-#else
+#if PY_MAJOR_VERSION < 3
 					int strlen = PyString_Size(obj);
+#else
+					int strlen = PyBytes_Size(obj);
 #endif
 					switch (querytype)
 					{
@@ -2528,7 +2557,11 @@ PyObject *eEPGCache::search(ePyObject arg)
 							it != eventData::descriptors.end(); ++it)
 						{
 							uint8_t *data = it->second.data;
+#if PY_MAJOR_VERSION < 3
 							int textlen = 0;
+#else
+							ssize_t textlen = 0;
+#endif
 							const char *textptr = NULL;
 							if ( data[0] == SHORT_EVENT_DESCRIPTOR && querytype > 0 && querytype < 5 )
 							{
