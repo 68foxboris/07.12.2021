@@ -933,7 +933,7 @@ RESULT eDVBCIInterfaces::setDescrambleRules(int slotid, SWIG_PYOBJECT(ePyObject)
 			PyErr_SetString(PyExc_StandardError, buf);
 			return -1;
 		}
-		char *tmpstr = PyString_AS_STRING(refstr);
+		const char *tmpstr = PyString_AS_STRING(refstr);
 		eServiceReference ref(tmpstr);
 		if (ref.valid())
 			slot->possible_services.insert(ref);
