@@ -1725,7 +1725,7 @@ int handleEvent(eServiceEvent *ptr, ePyObject dest_list, const char* argstring, 
 PyObject *eEPGCache::lookupEvent(ePyObject list, ePyObject convertFunc)
 {
 	ePyObject convertFuncArgs;
-	int argcount=0;
+	ssize_t argcount=0;
 	const char *argstring=NULL;
 	if (!PyList_Check(list))
 	{
@@ -1746,9 +1746,9 @@ PyObject *eEPGCache::lookupEvent(ePyObject list, ePyObject convertFunc)
 	else
 	{
 		ePyObject argv=PyList_GET_ITEM(list, 0); // borrowed reference!
-		if (PyString_Check(argv))
+		if (PyUnicode_Check(argv))
 		{
-			argstring = PyString_AS_STRING(argv);
+			argstring = PyUnicode_AS_STRING(argv);
 			++listIt;
 		}
 		else
@@ -1804,7 +1804,7 @@ PyObject *eEPGCache::lookupEvent(ePyObject list, ePyObject convertFunc)
 				{
 					case 0:
 					{
-						if (!PyString_Check(entry))
+						if (!PyUnicode_Check(entry))
 						{
 							eDebug("[eEPGCache] tuple entry 0 is no a string");
 							goto skip_entry;
@@ -1813,7 +1813,7 @@ PyObject *eEPGCache::lookupEvent(ePyObject list, ePyObject convertFunc)
 						break;
 					}
 					case 1:
-						type=PyInt_AsLong(entry);
+						type=PyLong_AsLong(entry);
 						if (type < -1 || type > 2)
 						{
 							eDebug("[eEPGCache] unknown type %d", type);
@@ -1821,10 +1821,10 @@ PyObject *eEPGCache::lookupEvent(ePyObject list, ePyObject convertFunc)
 						}
 						break;
 					case 2:
-						event_id=stime=PyInt_AsLong(entry);
+						event_id=stime=PyLong_AsLong(entry);
 						break;
 					case 3:
-						minutes=PyInt_AsLong(entry);
+						minutes=PyLong_AsLong(entry);
 						break;
 					default:
 						eDebug("[eEPGCache] unneeded extra argument");
@@ -1835,7 +1835,7 @@ PyObject *eEPGCache::lookupEvent(ePyObject list, ePyObject convertFunc)
 			if (minutes && stime == -1)
 				stime = ::time(0);
 
-			eServiceReference ref(handleGroup(eServiceReference(PyString_AS_STRING(service))));
+			eServiceReference ref(handleGroup(eServiceReference(PyUnicode_AS_STRING(service))));
 			// redirect subservice querys to parent service
 			eServiceReferenceDVB &dvb_ref = (eServiceReferenceDVB&)ref;
 			if (dvb_ref.getParentTransportStreamID().get()) // linkage subservice
@@ -2431,9 +2431,9 @@ PyObject *eEPGCache::search(ePyObject arg)
 			if (tuplesize > 4 && querytype == 0)
 			{
 				ePyObject obj = PyTuple_GET_ITEM(arg, 3);
-				if (PyString_Check(obj))
+				if (PyUnicode_Check(obj))
 				{
-					refstr = PyString_AS_STRING(obj);
+					const char *refstr = PyUnicode_AS_STRING(obj);
 					eServiceReferenceDVB ref(refstr);
 					if (ref.valid())
 					{
@@ -2483,7 +2483,7 @@ PyObject *eEPGCache::search(ePyObject arg)
 			else if (tuplesize > 4 && (querytype > 0) )
 			{
 				ePyObject obj = PyTuple_GET_ITEM(arg, 3);
-				if (PyString_Check(obj))
+				if (PyUnicode_Check(obj))
 				{
 					int casetype = PyLong_AsLong(PyTuple_GET_ITEM(arg, 4));
 					ssize_t strlen;
