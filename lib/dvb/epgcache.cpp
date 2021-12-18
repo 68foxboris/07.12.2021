@@ -2223,10 +2223,10 @@ void eEPGCache::importEvents(ePyObject serviceReferences, ePyObject list)
 {
 	std::vector<eServiceReferenceDVB> refs;
 
-	if (PyString_Check(serviceReferences))
+	if (PyUnicode_Check(serviceReferences))
 	{
 		const char *refstr;
-		refstr = PyString_AS_STRING(serviceReferences);
+		refstr = PyUnicode_AsUTF8(serviceReferences);
 	        if (!refstr)
 	        {
 			eDebug("[eEPGCache:import] serviceReferences string is 0, aborting");
