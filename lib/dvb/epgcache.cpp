@@ -2433,7 +2433,7 @@ PyObject *eEPGCache::search(ePyObject arg)
 				ePyObject obj = PyTuple_GET_ITEM(arg, 3);
 				if (PyUnicode_Check(obj))
 				{
-					const char *refstr = PyUnicode_AS_STRING(obj);
+					refstr = PyUnicode_AS_STRING(obj);
 					eServiceReferenceDVB ref(refstr);
 					if (ref.valid())
 					{
