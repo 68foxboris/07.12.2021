@@ -6,8 +6,11 @@
 
 #include <string>
 #include <lib/base/object.h>
+#include "Python.h"
 
 #if !defined(SKIP_PART1) && !defined(SWIG)
+
+
 class ePyObject
 {
 	PyObject *m_ob;
@@ -27,7 +30,7 @@ public:
 	inline ePyObject(PyDictObject *ob);
 	inline ePyObject(PyTupleObject *ob);
 	inline ePyObject(PyListObject *ob);
-	inline ePyObject(PyStringObject *ob);
+	inline ePyObject(PyUnicodeObject *ob);
 	operator bool() const { return !!m_ob; }
 	operator bool() { return !!m_ob; }
 	ePyObject &operator=(const ePyObject &);
@@ -36,12 +39,12 @@ public:
 	ePyObject &operator=(PyDictObject *ob) { return operator=((PyObject*)ob); }
 	ePyObject &operator=(PyTupleObject *ob) { return operator=((PyObject*)ob); }
 	ePyObject &operator=(PyListObject *ob) { return operator=((PyObject*)ob); }
-	ePyObject &operator=(PyStringObject *ob) { return operator=((PyObject*)ob); }
+	ePyObject &operator=(PyUnicodeObject *ob) { return operator=((PyObject*)ob); }
 	operator PyObject*();
-	operator PyVarObject*() { return (PyVarObject*)operator PyObject*(); }
+	operator PyVarObject*() { return (PyVarObject*)operator PyVarObject*(); }
 	operator PyTupleObject*() { return (PyTupleObject*)operator PyObject*(); }
 	operator PyListObject*() { return (PyListObject*)operator PyObject*(); }
-	operator PyStringObject*() { return (PyStringObject*)operator PyObject*(); }
+	operator PyUnicodeObject*() { return (PyUnicodeObject*)operator PyObject*(); }
 	operator PyDictObject*() { return (PyDictObject*)operator PyObject*(); }
 	PyObject *operator->() { return operator PyObject*(); }
 #ifdef PYTHON_REFCOUNT_DEBUG
@@ -118,7 +121,7 @@ inline ePyObject::ePyObject(PyListObject *ob)
 {
 }
 
-inline ePyObject::ePyObject(PyStringObject *ob)
+inline ePyObject::ePyObject(PyUnicodeObject *ob)
 	:m_ob((PyObject*)ob)
 #ifdef PYTHON_REFCOUNT_DEBUG
 	,m_file(0), m_line(0), m_from(0), m_to(0), m_erased(false)
@@ -235,21 +238,21 @@ inline ePyObject Impl_PyDict_New(const char* file, int line)
 
 inline ePyObject Impl_PyString_FromString(const char* file, int line, const char *str)
 {
-	return ePyObject(PyString_FromString(str), file, line);
+	return ePyObject(PyUnicode_FromString(str), file, line);
 }
 
 inline ePyObject Impl_PyString_FromFormat(const char* file, int line, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
-	PyObject *ob = PyString_FromFormatV(fmt, ap);
+	PyObject *ob = PyUnicode_FromFormatV(fmt, ap);
 	va_end(ap);
 	return ePyObject(ob, file, line);
 }
 
 inline ePyObject Impl_PyInt_FromLong(const char* file, int line, long val)
 {
-	return ePyObject(PyInt_FromLong(val), file, line);
+	return ePyObject(PyLong_FromLong(val), file, line);
 }
 
 inline ePyObject Impl_PyLong_FromLong(const char* file, int line, long val)
@@ -320,21 +323,21 @@ inline ePyObject Impl_PyDict_New()
 
 inline ePyObject Impl_PyString_FromString(const char *str)
 {
-	return PyString_FromString(str);
+	return PyUnicode_FromString(str);
 }
 
 inline ePyObject Impl_PyString_FromFormat(const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
-	PyObject *ob = PyString_FromFormatV(fmt, ap);
+	PyObject *ob = PyUnicode_FromFormatV(fmt, ap);
 	va_end(ap);
 	return ePyObject(ob);
 }
 
 inline ePyObject Impl_PyInt_FromLong(long val)
 {
-	return PyInt_FromLong(val);
+	return PyLong_FromLong(val);
 }
 
 inline ePyObject Impl_PyLong_FromLong(long val)
