@@ -2185,7 +2185,7 @@ unsigned int eEPGCache::getEpgmaxdays()
 
 static const char* getStringFromPython(ePyObject obj)
 {
-	char *result = 0;
+	const char *result = 0;
 	if (PyUnicode_Check(obj))
 	{
 		result = PyUnicode_AsUTF8(obj);
