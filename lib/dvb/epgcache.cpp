@@ -1748,7 +1748,7 @@ PyObject *eEPGCache::lookupEvent(ePyObject list, ePyObject convertFunc)
 		ePyObject argv=PyList_GET_ITEM(list, 0); // borrowed reference!
 		if (PyUnicode_Check(argv))
 		{
-			argstring = PyUnicode_AS_STRING(argv);
+			argstring = PyUnicode_AsUTF8(argv);
 			++listIt;
 		}
 		else
@@ -1835,7 +1835,7 @@ PyObject *eEPGCache::lookupEvent(ePyObject list, ePyObject convertFunc)
 			if (minutes && stime == -1)
 				stime = ::time(0);
 
-			eServiceReference ref(handleGroup(eServiceReference(PyUnicode_AS_STRING(service))));
+			eServiceReference ref(handleGroup(eServiceReference(PyUnicode_AsUTF8(service))));
 			// redirect subservice querys to parent service
 			eServiceReferenceDVB &dvb_ref = (eServiceReferenceDVB&)ref;
 			if (dvb_ref.getParentTransportStreamID().get()) // linkage subservice
@@ -2186,9 +2186,9 @@ unsigned int eEPGCache::getEpgmaxdays()
 static const char* getStringFromPython(ePyObject obj)
 {
 	char *result = 0;
-	if (PyString_Check(obj))
+	if (PyUnicode_Check(obj))
 	{
-		result = PyString_AS_STRING(obj);
+		result = PyUnicode_AsUTF8(obj);
 	}
 	return result;
 }
@@ -2241,9 +2241,9 @@ void eEPGCache::importEvents(ePyObject serviceReferences, ePyObject list)
 			eDebug("[eEPGCache:import] serviceReferences tuple must contain 3 numbers (onid, tsid, sid), aborting");
 			return;
 		}
-		int onid = PyInt_AsLong(PyTuple_GET_ITEM(serviceReferences, 0));
-		int tsid = PyInt_AsLong(PyTuple_GET_ITEM(serviceReferences, 1));
-		int sid = PyInt_AsLong(PyTuple_GET_ITEM(serviceReferences, 2));
+		int onid = PyLong_AsLong(PyTuple_GET_ITEM(serviceReferences, 0));
+		int tsid = PyLong_AsLong(PyTuple_GET_ITEM(serviceReferences, 1));
+		int sid = PyLong_AsLong(PyTuple_GET_ITEM(serviceReferences, 2));
 		refs.push_back(eServiceReferenceDVB(0, tsid, onid, sid, 0));
 	}
 	else if (PyList_Check(serviceReferences))
@@ -2252,10 +2252,10 @@ void eEPGCache::importEvents(ePyObject serviceReferences, ePyObject list)
 		for (int i = 0; i < nRefs; ++i)
 		{
 			PyObject* item = PyList_GET_ITEM(serviceReferences, i);
-			if (PyString_Check(item))
+			if (PyUnicode_Check(item))
 			{
 				const char *refstr;
-				refstr = PyString_AS_STRING(item);
+				refstr = PyUnicode_AsUTF8(item);
 				if (!refstr)
 				{
 					eDebug("[eEPGCache:import] serviceReferences[%d] is not a string", i);
@@ -2271,9 +2271,9 @@ void eEPGCache::importEvents(ePyObject serviceReferences, ePyObject list)
 				{
 					eDebug("[eEPGCache:import] serviceReferences[%d] tuple must contain 3 numbers (onid, tsid, sid)", i);
 				}
-				int onid = PyInt_AsLong(PyTuple_GET_ITEM(item, 0));
-				int tsid = PyInt_AsLong(PyTuple_GET_ITEM(item, 1));
-				int sid = PyInt_AsLong(PyTuple_GET_ITEM(item, 2));
+				int onid = PyLong_AsLong(PyTuple_GET_ITEM(item, 0));
+				int tsid = PyLong_AsLong(PyTuple_GET_ITEM(item, 1));
+				int sid = PyLong_AsLong(PyTuple_GET_ITEM(item, 2));
 				refs.push_back(eServiceReferenceDVB(0, tsid, onid, sid, 0));
 			}
 			else
@@ -2319,12 +2319,12 @@ void eEPGCache::importEvents(ePyObject serviceReferences, ePyObject list)
 			return;
 		}
 
-		long start = PyInt_AsUnsignedLongMask(PyTuple_GET_ITEM(singleEvent, 0));
-		long duration = PyInt_AsUnsignedLongMask(PyTuple_GET_ITEM(singleEvent, 1));
+		long start = PyLong_AsUnsignedLongMask(PyTuple_GET_ITEM(singleEvent, 0));
+		long duration = PyLong_AsUnsignedLongMask(PyTuple_GET_ITEM(singleEvent, 1));
 		const char *title = getStringFromPython(PyTuple_GET_ITEM(singleEvent, 2));
 		const char *short_summary = getStringFromPython(PyTuple_GET_ITEM(singleEvent, 3));
 		const char *long_description = getStringFromPython(PyTuple_GET_ITEM(singleEvent, 4));
-		char event_type = (char) PyInt_AsLong(PyTuple_GET_ITEM(singleEvent, 5));
+		char event_type = (char) PyLong_AsLong(PyTuple_GET_ITEM(singleEvent, 5));
 
 		Py_BEGIN_ALLOW_THREADS;
 		submitEventData(refs, start, duration, title, short_summary, long_description, event_type);
@@ -2376,7 +2376,7 @@ PyObject *eEPGCache::search(ePyObject arg)
 	int eventid = -1;
 	const char *argstring=0;
 	const char *refstr=0;
-	ssize_t argcount=0;
+	int argcount=0;
 	int querytype=-1;
 	bool needServiceEvent=false;
 	int maxmatches=0;
@@ -2389,7 +2389,7 @@ PyObject *eEPGCache::search(ePyObject arg)
 		if (tuplesize > 0)
 		{
 			ePyObject obj = PyTuple_GET_ITEM(arg,0);
-			if (PyString_Check(obj))
+			if (PyUnicode_Check(obj))
 			{
 				argstring = PyUnicode_AsUTF8AndSize(obj, &argcount);
 				for (int i=0; i < argcount; ++i)
@@ -2433,7 +2433,7 @@ PyObject *eEPGCache::search(ePyObject arg)
 				ePyObject obj = PyTuple_GET_ITEM(arg, 3);
 				if (PyUnicode_Check(obj))
 				{
-					refstr = PyUnicode_AS_STRING(obj);
+					const char *refstr = PyUnicode_AsUTF8(obj);
 					eServiceReferenceDVB ref(refstr);
 					if (ref.valid())
 					{
