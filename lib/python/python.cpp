@@ -182,7 +182,7 @@ int ePython::execute(const std::string &pythonfile, const std::string &funcname)
 			Py_DECREF(pArgs);
 			if (pValue)
 			{
-				printf("Result of call: %ld\n", PyInt_AsLong(pValue));
+				printf("Result of call: %ld\n", PyLong_AsLong(pValue));
 				Py_DECREF(pValue);
 			} else
 			{
