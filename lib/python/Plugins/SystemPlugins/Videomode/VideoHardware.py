@@ -1,3 +1,4 @@
+from __future__ import print_function
 from Components.config import config, ConfigSelection, ConfigSubDict, ConfigYesNo
 from Components.SystemInfo import BoxInfo
 from Tools.CList import CList
@@ -122,7 +123,7 @@ class VideoHardware:
 		ret = (16, 9)
 		port = config.av.videoport.value
 		if port not in config.av.videomode:
-			print "[VideoHardware] current port not available in getOutputAspect!!! force 16:9"
+			print("[VideoHardware] current port not available in getOutputAspect!!! force 16:9")
 		else:
 			mode = config.av.videomode[port].value
 			force_widescreen = self.isWidescreenMode(port, mode)
@@ -156,10 +157,10 @@ class VideoHardware:
 		self.readPreferredModes()
 
 		if "DVI-PC" in self.modes and not self.getModeList("DVI-PC"):
-			print "[VideoHardware] remove DVI-PC because of not existing modes"
+			print("[VideoHardware] remove DVI-PC because of not existing modes")
 			del self.modes["DVI-PC"]
 		if "Scart" in self.modes and not self.getModeList("Scart"):
-			print "[VideoHardware] remove Scart because of not existing modes"
+			print("[VideoHardware] remove Scart because of not existing modes")
 			del self.modes["Scart"]
 		if "YPbPr" in self.modes and not has_yuv:
 			del self.modes["YPbPr"]
@@ -187,7 +188,7 @@ class VideoHardware:
 		try:
 			modes = open("/proc/stb/video/videomode_choices").read()[:-1]
 		except IOError:
-			print "[VideoHardware] couldn't read available videomodes."
+			print("[VideoHardware] couldn't read available videomodes.")
 			self.modes_available = []
 			return
 		self.modes_available = modes.split(' ')
@@ -217,10 +218,10 @@ class VideoHardware:
 
 			if len(self.modes_preferred) <= 1:
 				self.modes_preferred = self.modes_available
-				print "[VideoHardware] reading preferred modes is empty, using all video modes"
+				print("[VideoHardware] reading preferred modes is empty, using all video modes")
 		else:
 			self.modes_preferred = self.modes_available
-			print "[VideoHardware] reading preferred modes override, using all video modes"
+			print("[VideoHardware] reading preferred modes override, using all video modes")
 
 		self.last_modes_preferred = self.modes_preferred
 
@@ -240,7 +241,7 @@ class VideoHardware:
 		return mode in self.widescreen_modes
 
 	def setMode(self, port, mode, rate, force=None):
-		print "[VideoHardware] setMode - port:", port, "mode:", mode, "rate:", rate
+		print("[VideoHardware] setMode - port:", port, "mode:", mode, "rate:", rate)
 		# we can ignore "port"
 		self.current_mode = mode
 		self.current_port = port
@@ -272,7 +273,7 @@ class VideoHardware:
 			try:
 				open("/proc/stb/video/videomode_24hz", "w").write(mode_24)
 			except IOError:
-				print "[VideoHardware] cannot open /proc/stb/video/videomode_24hz"
+				print("[VideoHardware] cannot open /proc/stb/video/videomode_24hz")
 
 		if brand == "gigablue":
 			try:
@@ -284,7 +285,7 @@ class VideoHardware:
 		self.updateAspect(None)
 
 	def saveMode(self, port, mode, rate):
-		print "[VideoHardware] saveMode", port, mode, rate
+		print("[VideoHardware] saveMode", port, mode, rate)
 		config.av.videoport.value = port
 		config.av.videoport.save()
 		if port in config.av.videomode:
@@ -310,7 +311,7 @@ class VideoHardware:
 
 	# get a list with all modes, with all rates, for a given port.
 	def getModeList(self, port):
-		print "[VideoHardware] getModeList for port", port
+		print("[VideoHardware] getModeList for port", port)
 		res = []
 		for mode in self.modes[port]:
 			# list all rates which are completely valid
@@ -355,13 +356,13 @@ class VideoHardware:
 	def setConfiguredMode(self):
 		port = config.av.videoport.value
 		if port not in config.av.videomode:
-			print "[VideoHardware] current port not available, not setting videomode"
+			print("[VideoHardware] current port not available, not setting videomode")
 			return
 
 		mode = config.av.videomode[port].value
 
 		if mode not in config.av.videorate:
-			print "[VideoHardware] current mode not available, not setting videomode"
+			print("[VideoHardware] current mode not available, not setting videomode")
 			return
 
 		if platform == "dmamlogic" and (mode.find("0p30") != -1 or mode.find("0p24") != -1 or mode.find("0p25") != -1):
@@ -395,7 +396,7 @@ class VideoHardware:
 
 		port = config.av.videoport.value
 		if port not in config.av.videomode:
-			print "[VideoHardware] current port not available, not setting videomode"
+			print("[VideoHardware] current port not available, not setting videomode")
 			return
 		mode = config.av.videomode[port].value
 

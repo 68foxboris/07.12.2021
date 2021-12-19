@@ -1,4 +1,5 @@
 # -*- coding: UTF-8 -*-
+from __future__ import print_function
 from Tools.Profile import profile
 
 from Screen import Screen
@@ -407,7 +408,7 @@ class ChannelContextMenu(Screen):
 			for file in os.listdir("/etc/enigma2/"):
 				if file.startswith("userbouquet") and file.endswith(".del"):
 					file = "/etc/enigma2/" + file
-					print "[ChannelSelection] permantly remove file ", file
+					print("[ChannelSelection] permantly remove file ", file)
 					os.remove(file)
 			self.close()
 
@@ -415,7 +416,7 @@ class ChannelContextMenu(Screen):
 		for file in os.listdir("/etc/enigma2/"):
 			if file.startswith("userbouquet") and file.endswith(".del"):
 				file = "/etc/enigma2/" + file
-				print "[ChannelSelection] restore file ", file[:-4]
+				print("[ChannelSelection] restore file ", file[:-4])
 				os.rename(file, file[:-4])
 		eDVBDBInstance = eDVBDB.getInstance()
 		eDVBDBInstance.setLoadUnlinkedUserbouquets(True)
@@ -1003,7 +1004,7 @@ class ChannelSelectionEdit:
 				if mutableAlternatives:
 					mutableAlternatives.setListName(name)
 					if mutableAlternatives.addService(cur_service.ref):
-						print "[ChannelSelection] add", cur_service.ref.toString(), "to new alternatives failed"
+						print("[ChannelSelection] add", cur_service.ref.toString(), "to new alternatives failed")
 					mutableAlternatives.flushChanges()
 					self.servicelist.addService(new_ref.ref, True)
 					self.servicelist.removeCurrent()
@@ -1014,11 +1015,11 @@ class ChannelSelectionEdit:
 					if self.startServiceRef and cur_service.ref == self.startServiceRef:
 						self.startServiceRef = new_ref.ref
 				else:
-					print "[ChannelSelection] get mutable list for new created alternatives failed"
+					print("[ChannelSelection] get mutable list for new created alternatives failed")
 			else:
-				print "[ChannelSelection] add", str, "to", cur_root.getServiceName(), "failed"
+				print("[ChannelSelection] add", str, "to", cur_root.getServiceName(), "failed")
 		else:
-			print "[ChannelSelection] bouquetlist is not editable"
+			print("[ChannelSelection] bouquetlist is not editable")
 
 	def addBouquet(self, bName, services):
 		serviceHandler = eServiceCenter.getInstance()
@@ -1041,7 +1042,7 @@ class ChannelSelectionEdit:
 					if services is not None:
 						for service in services:
 							if mutableBouquet.addService(service):
-								print "add", service.toString(), "to new bouquet failed"
+								print("add", service.toString(), "to new bouquet failed")
 					mutableBouquet.flushChanges()
 				else:
 					print "get mutable list for new created bouquet failed"
@@ -1056,7 +1057,7 @@ class ChannelSelectionEdit:
 			else:
 				print("[ChannelSelection] add", new_bouquet_ref.toString(), "to bouquets failed")
 		else:
-			print "bouquetlist is not editable"
+			print("bouquetlist is not editable")
 
 	def copyCurrentToBouquetList(self):
 		provider = ServiceReference(self.getCurrentSelection())
@@ -1082,18 +1083,18 @@ class ChannelSelectionEdit:
 					if self.startServiceRef and cur_service.ref == self.startServiceRef:
 						self.startServiceRef = first_in_alternative
 				else:
-					print "[ChannelSelection] couldn't add first alternative service to current root"
+					print("[ChannelSelection] couldn't add first alternative service to current root")
 			else:
-				print "[ChannelSelection] couldn't edit current root!!"
+				print("[ChannelSelection] couldn't edit current root!!")
 		else:
-			print "[ChannelSelection] remove empty alternative list !!"
+			print("[ChannelSelection] remove empty alternative list !!")
 		self.removeBouquet()
 		if not end:
 			self.servicelist.moveUp()
 
 	def removeBouquet(self):
 		refstr = self.getCurrentSelection().toString()
-		print "[ChannelSelection] removeBouquet", refstr
+		print("[ChannelSelection] removeBouquet", refstr)
 		pos = refstr.find('FROM BOUQUET "')
 		filename = None
 		self.removeCurrentService(bouquet=True)

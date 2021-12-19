@@ -6,8 +6,25 @@
 
 #include <string>
 #include <lib/base/object.h>
+#include "Python.h"
 
 #if !defined(SKIP_PART1) && !defined(SWIG)
+
+#if PY_MAJOR_VERSION >= 3
+#define PyStringObject PyUnicodeObject
+#define PyString_FromStringAndSize PyUnicode_FromStringAndSize
+#define PyString_AS_STRING PyUnicode_AsUTF8
+#define PyString_AsString PyUnicode_AsUTF8
+#define PyString_Check PyUnicode_Check
+
+#define PyInt_AsLong PyLong_AsLong
+#define PyInt_Check PyLong_Check
+#define PyInt_AsUnsignedLongMask PyLong_AsUnsignedLongMask
+
+#define PyExc_StandardError PyExc_Exception
+#endif
+
+
 class ePyObject
 {
 	PyObject *m_ob;
@@ -220,7 +237,11 @@ inline void Impl_Py_XINCREF(const char* file, int line, const ePyObject &obj)
 
 inline ePyObject Impl_PyTuple_New(const char* file, int line, int elements=0)
 {
+#if PY_MAJOR_VERSION >= 3
+	return ePyObject(PyUnicode_FromString(str), file, line);
+#else
 	return ePyObject(PyTuple_New(elements), file, line);
+#endif
 }
 
 inline ePyObject Impl_PyList_New(const char* file, int line, int elements=0)

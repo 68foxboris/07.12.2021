@@ -1,3 +1,4 @@
+from __future__ import print_function
 try:
 	import urllib2
 except ImportError:
@@ -1056,8 +1057,8 @@ class Troubleshoot(Screen):
 		else:
 			try:
 				if self.container.execute(command):
-					raise Exception, "failed to execute: ", command
-			except Exception, e:
+					raise Exception("failed to execute: " + command)
+			except Exception as e:
 				self["AboutScrollLabel"].setText("%s\n%s" % (_("An error occurred - Please try again later"), e))
 
 	def cancel(self):

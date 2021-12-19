@@ -1,3 +1,4 @@
+from __future__ import print_function
 from bisect import insort
 from os import fsync, makedirs, remove, rename, sys
 from os.path import exists, isdir, realpath

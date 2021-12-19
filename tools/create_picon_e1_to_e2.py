@@ -4,7 +4,7 @@
 # run in picon directory.
 # It will read the servicenames from the lamedb and create symlinks
 # for the servicereference names.
-
+from __future__ import print_function
 import os
 import sys
 
@@ -67,7 +67,7 @@ while len(f) > 2:
 	except:
 		pass
 
-	print sat[0:2] + '.' + sat[-1:] + 'E' + '_' + "%X" % ref[0] + '.png'
+	print(sat[0:2] + '.' + sat[-1:] + 'E' + '_' + "%X" % ref[0] + '.png')
 	try:
 		os.rename(sat[0:-1] + 'E' + '_' + "%X" % ref[0] + '.png', sat + '/' + servicetype + '/' + filename)
 	except:

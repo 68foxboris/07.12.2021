@@ -1,3 +1,4 @@
+from __future__ import print_function
 from json import loads
 try:
 	from urllib2 import URLError, urlopen

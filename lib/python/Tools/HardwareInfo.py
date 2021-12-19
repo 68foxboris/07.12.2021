@@ -1,7 +1,9 @@
-from Components.SystemInfo import SystemInfo
+from __future__ import print_function
+from Components.SystemInfo import BoxInfo
 from Tools.Directories import fileReadLine
  
 MODULE_NAME = __name__.split(".")[-1]
+
 hw_info = None
 
 
@@ -21,9 +23,9 @@ class HardwareInfo:
 
 		self.device_version = fileReadLine("/proc/stb/info/version", "", source=MODULE_NAME).strip()
 		self.device_revision = fileReadLine("/proc/stb/info/board_revision", "", source=MODULE_NAME).strip()
-		self.device_name = SystemInfo.get("model")
-		self.device_brandname = SystemInfo.get("brand")
-		self.device_model = SystemInfo.get("model")
+		self.device_name = BoxInfo.get("model")
+		self.device_brandname = BoxInfo.get("brand")
+		self.device_model = BoxInfo.get("model")
 		self.device_model = self.device_model or self.device_name
 		self.device_hw = self.device_model
 		self.machine_name = self.device_model
@@ -33,7 +35,7 @@ class HardwareInfo:
 			self.device_string = "%s (%s)" % (self.device_hw, self.device_version)
 		else:
 			self.device_string = self.device_hw
-		self.device_hdmi = SystemInfo.get("hdmi")  # Only some early DMM boxes do not have HDMI hardware.
+		self.device_hdmi = BoxInfo.get("hdmi")  # Only some early DMM boxes do not have HDMI hardware.
 		print("[HardwareInfo] Detected: '%s'." % self.get_device_string())
 
 	def get_device_name(self):

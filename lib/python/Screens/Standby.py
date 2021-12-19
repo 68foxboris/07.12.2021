@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import struct
 import RecordTimer
@@ -56,7 +57,7 @@ class StandbyScreen(Screen):
 		Screen.__init__(self, session)
 		self.avswitch = AVSwitch()
 
-		print "[Standby] enter standby"
+		print("[Standby] enter standby")
 
 		if os.path.exists("/usr/script/standby_enter.sh"):
 			Console().ePopen("/usr/script/standby_enter.sh")
@@ -163,7 +164,7 @@ class StandbyScreen(Screen):
 			config.misc.standbyCounter.value += 1
 
 	def Power(self):
-		print "[Standby] leave standby"
+		print("[Standby] leave standby")
 		self.close(True)
 
 	def setMute(self):

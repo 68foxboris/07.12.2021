@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 import os
 import re
 import unicodedata
@@ -29,7 +30,7 @@ class PiconLocator:
 				if os.path.isdir(path) and path not in self.searchPaths:
 					for fn in os.listdir(path):
 						if fn.endswith('.png') or fn.endswith('.svg'):
-							print "[Picon] adding path:", path
+							print("[Picon] adding path:", path)
 							self.searchPaths.append(path)
 							break
 			except:
@@ -40,7 +41,7 @@ class PiconLocator:
 			path = os.path.join(mountpoint, self.piconDirectories) + '/'
 			try:
 				self.searchPaths.remove(path)
-				print "[Picon] removed path:", path
+				print("[Picon] removed path:", path)
 			except:
 				pass
 

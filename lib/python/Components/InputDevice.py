@@ -1,3 +1,4 @@
+from __future__ import print_function
 from fcntl import ioctl
 from os import listdir, open as osopen, close as osclose, write as oswrite, O_RDWR, O_NONBLOCK
 from os.path import isdir, isfile

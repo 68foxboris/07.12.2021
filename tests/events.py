@@ -1,3 +1,4 @@
+from __future__ import print_function
 import time
 import tests
 
@@ -46,7 +47,7 @@ def end_log(test_name):
 		expected = f.read()
 		f.close()
 	except:
-		print "[events] NO TEST RESULT FOUND, creating new"
+		print("[events] NO TEST RESULT FOUND, creating new")
 		f = open(test_name + ".new_results", "wb")
 		f.write(results)
 		f.close()
@@ -54,14 +55,14 @@ def end_log(test_name):
 	print results
 
 	if expected is not None:
-		print "[events] expected:"
+		print("[events] expected:")
 		if expected != results:
 			open(test_name + ".bogus_results", "wb").write(results)
 			raise tests.TestError("test data does not match")
 		else:
-			print "[events] test compared ok"
+			print("[events] test compared ok")
 	else:
-		print "[events] no test data to compare with."
+		print("[events] no test data to compare with.")
 
 
 def log(fnc, base_time=0, test_name="test", *args, **kwargs):
@@ -72,6 +73,6 @@ def log(fnc, base_time=0, test_name="test", *args, **kwargs):
 	try:
 		fnc(*args, **kwargs)
 		event(None, "test_completed", [], {"test_name": test_name})
-	except tests.TestError, c:
+	except tests.TestError as c:
 		event(None, "test_failed", [], {"test_name": test_name, "reason": str(c)})
 	end_log(test_name)

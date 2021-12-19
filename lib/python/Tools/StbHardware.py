@@ -1,3 +1,4 @@
+from __future__ import print_function
 from fcntl import ioctl
 from os.path import exists, isfile
 from struct import pack, unpack
