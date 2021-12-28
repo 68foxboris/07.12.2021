@@ -1,5 +1,5 @@
 from fcntl import ioctl
-from os import listdir, open as osopen, close as osclose, write as oswrite, O_RDWR, O_NONBLOCK
+from os import O_NONBLOCK, O_RDWR, close as osclose, listdir, open as osopen, write as oswrite
 from os.path import isdir, isfile
 from platform import machine
 from boxbranding import getBoxType, getBoxBrand
@@ -9,9 +9,11 @@ from enigma import eRCInput
 
 from keyids import KEYIDS, KEYIDNAMES
 from Components.config import ConfigSubsection, ConfigInteger, ConfigSelection, ConfigYesNo, ConfigText, ConfigSlider, config
+from Components.Console import Console
 from Components.SystemInfo import BoxInfo
 from Tools.Directories import SCOPE_KEYMAPS, SCOPE_SKINS, fileReadLine, fileWriteLine, fileReadLines, fileReadXML, resolveFilename, pathExists
 
+from six import ensure_str
 MODULE_NAME = __name__.split(".")[-1]
 
 # BLACKLIST = ("dreambox front panel", "cec_input")  # Why was this being done?
@@ -26,7 +28,7 @@ config.inputDevices = ConfigSubsection()
 
 class InputDevices:
 	def __init__(self):
-		self.Devices = {}
+		self.devices = {}
 		self.currentDevice = ""
 		for device in sorted(listdir("/dev/input/")):
 			if isdir("/dev/input/%s" % device):
@@ -50,7 +52,7 @@ class InputDevices:
 				# if self.name in BLACKLIST:
 				# 	print("[InputDevice] ALERT: Old code flag for device in blacklist.")
 				# 	continue
-				self.Devices[device] = {
+				self.devices[device] = {
 					"name": self.name,
 					"type": devType,
 					"enabled": False,
@@ -90,7 +92,7 @@ class InputDevices:
 			return None
 
 	def getDeviceList(self):
-		return sorted(list(self.Devices.keys()))
+		return sorted(list(self.devices.keys()))
 
 	# struct input_event {
 	# 	struct timeval time;    -> ignored
@@ -100,7 +102,7 @@ class InputDevices:
 	# }; -> size = 16
 	#
 	def setDeviceDefaults(self, device):
-		# print("[InputDevice] setDeviceDefaults DEBUG: Device '%s'." % device)
+		print("[InputDevice] setDeviceDefaults DEBUG: Device '%s'." % device)
 		self.setDeviceAttribute(device, "configuredName", None)
 		eventRepeat = pack("LLHHi", 0, 0, 0x14, 0x01, 100)
 		eventDelay = pack("LLHHi", 0, 0, 0x14, 0x00, 700)
@@ -117,8 +119,8 @@ class InputDevices:
 			self.setDeviceDefaults(device)
 
 	def getDeviceName(self, device):
-		if device in list(self.Devices.keys()):
-			return self.Devices[device].get("name", device)
+		if device in list(self.devices.keys()):
+			return self.devices[device].get("name", device)
 		return "Unknown device name"
 
 	def setDeviceName(self, device, value):
@@ -129,7 +131,7 @@ class InputDevices:
 		if self.getDeviceAttribute(device, "enabled"):
 			# print("[InputDevice] setDeviceDelay DEBUG: Set device '%s' to %s ms." % (device, value))
 			event = pack("LLHHi", 0, 0, 0x14, 0x00, int(value))
-			fd = osopen("/dev/input/" + device, O_RDWR)
+			fd = osopen("/dev/input/%s" % device, O_RDWR)
 			oswrite(fd, event)
 			osclose(fd)
 
@@ -137,19 +139,19 @@ class InputDevices:
 		if self.getDeviceAttribute(device, "enabled"):
 			# print("[InputDevice] setDeviceRepeat DEBUG: Set device '%s' to %s ms." % (device, value))
 			event = pack("LLHHi", 0, 0, 0x14, 0x01, int(value))
-			fd = osopen("/dev/input/" + device, O_RDWR)
+			fd = osopen("/dev/input/%s" % device, O_RDWR)
 			oswrite(fd, event)
 			osclose(fd)
 
 	def getDeviceAttribute(self, device, attribute):
-		if device in self.Devices and attribute in self.Devices[device]:
-			return self.Devices[device][attribute]
+		if device in self.devices and attribute in self.devices[device]:
+			return self.devices[device][attribute]
 		return None
 
 	def setDeviceAttribute(self, device, attribute, value):
 		# print("[InputDevice] setDeviceAttribute DEBUG: Set attribute '%s' for device '%s' to value '%s'." % (attribute, device, value))
-		if device in self.Devices:
-			self.Devices[device][attribute] = value
+		if device in self.devices:
+			self.devices[device][attribute] = value
 
 
 class Keyboard:
@@ -206,7 +208,6 @@ class RemoteControl:
 		self.model = BoxInfo.getItem("model")
 		self.rcName = BoxInfo.getItem("rcname")
 		self.rcType = self.readRemoteControlType()
-		print("[InputDevice] RemoteControl DEBUG: model='%s', rcName='%s', rcType='%s'." % (self.model, self.rcName, self.rcType))
 		remotes = fileReadXML(resolveFilename(SCOPE_SKINS, "remotes.xml"), source=MODULE_NAME)
 		self.remotes = []
 		if remotes:
@@ -227,23 +228,24 @@ class RemoteControl:
 			index = str(index)
 			rcChoices.append((index, remote[REMOTE_DISPLAY_NAME]))
 			if self.model == remote[REMOTE_MODEL] and self.rcType == remote[REMOTE_RCTYPE] and self.rcName in [x.strip() for x in remote[REMOTE_NAME].split(",")]:
+				print("[InputDevice] Default remote control identified as '%s'.  (model='%s', rcName='%s', rcType='%s')" % (remote[REMOTE_DISPLAY_NAME], self.model, self.rcName, self.rcType))
 				default = index
 		config.inputDevices.remotesIndex = ConfigSelection(choices=rcChoices, default=default)
 		self.remote = self.loadRemoteControl(BoxInfo.getItem("RCMapping"))
 
 	def loadRemoteControl(self, filename):
 		print("[InputDevice] Loading remote control '%s'." % filename)
-		logRemaps = []
-		remapButtons = {}
-		rcButtons = {}
-		rcButtons["keyIds"] = []
 		rcs = fileReadXML(filename, source=MODULE_NAME)
+		rcButtons = {}
 		if rcs:
 			rc = rcs.find("rc")
 			if rc:
-				index = int(rc.attrib.get("id", "2"))  # The id attribute is deprecated and will be removed.
+				logRemaps = []
+				remapButtons = {}
+				placeHolder = 0
+				rcButtons["keyIds"] = []
 				rcButtons["image"] = rc.attrib.get("image")
-				print("[InputDevice] loadRemoteControl DEBUG: id='%s', image='%s'." % (index, rcButtons["image"]))
+				print("[InputDevice] Remote control image file '%s'." % rcButtons["image"])
 				for button in rc.findall("button"):
 					id = button.attrib.get("id", button.attrib.get("keyid"))
 					remap = button.attrib.get("remap")
@@ -343,8 +345,8 @@ class RemoteControl:
 class InitInputDevices:
 	def __init__(self):
 		self.currentDevice = ""
-		for device in sorted(list(iInputDevices.Devices.keys())):
-			# print("[InputDevice] InitInputDevices DEBUG: Creating config entry for device: '%s' -> '%s'." % (device, inputDevices.devices[device]["name"]))
+		for device in sorted(list(inputDevices.devices.keys())):
+			print("[InputDevice] InitInputDevices DEBUG: Creating config entry for device: '%s' -> '%s'." % (device, inputDevices.devices[device]["name"]))
 			self.currentDevice = device
 			self.setupConfigEntries(self.currentDevice)
 			self.currentDevice = ""
@@ -352,58 +354,48 @@ class InitInputDevices:
 	def setupConfigEntries(self, device):
 		setattr(config.inputDevices, device, ConfigSubsection())
 		configItem = getattr(config.inputDevices, device)
-		model = BoxInfo.getItem("model")
-		configItem.enabled = ConfigYesNo(default=(model == 'dm800' or model == 'azboxhd'))
+		configItem.enabled = ConfigYesNo(default=BoxInfo.getItem("RemoteEnable", False))
 		configItem.enabled.addNotifier(self.inputDevicesEnabledChanged)
 		configItem.name = ConfigText(default="")
 		configItem.name.addNotifier(self.inputDevicesNameChanged)
-		repeat = 100
-		if model in ('maram9', 'classm', 'axodin', 'axodinc', 'starsatlx', 'genius', 'evo', 'galaxym6'):
-			repeat = 400
-		elif model == 'azboxhd':
-			repeat = 150
-		configItem.repeat = ConfigSlider(default=repeat, increment = 10, limits=(0, 500))
+		configItem.repeat = ConfigSlider(default=BoxInfo.getItem("RemoteRepeat", 100), increment = 10, limits=(0, 500))
 		configItem.repeat.addNotifier(self.inputDevicesRepeatChanged)
-		if model in ('maram9', 'classm', 'axodin', 'axodinc', 'starsatlx', 'genius', 'evo', 'galaxym6'):
-			delay = 200
-		else:
-			delay = 700
-		configItem.delay = ConfigSlider(default=delay, increment = 100, limits=(0, 5000))
+		configItem.delay = ConfigSlider(default=BoxInfo.getItem("RemoteDelay", 700), increment = 100, limits=(0, 5000))
 		configItem.delay.addNotifier(self.inputDevicesDelayChanged)
 
 	def inputDevicesEnabledChanged(self, configElement):
-		if self.currentDevice != "" and iInputDevices.currentDevice == "":
-			iInputDevices.setDeviceEnabled(self.currentDevice, configElement.value)
+		if self.currentDevice != "" and inputDevices.currentDevice == "":
+			inputDevices.setDeviceEnabled(self.currentDevice, configElement.value)
 		elif iInputDevices.currentDevice != "":
-			iInputDevices.setDeviceEnabled(iInputDevices.currentDevice, configElement.value)
+			inputDevices.setDeviceEnabled(inputDevices.currentDevice, configElement.value)
 
 	def inputDevicesNameChanged(self, configElement):
-		if self.currentDevice != "" and iInputDevices.currentDevice == "":
-			iInputDevices.setDeviceName(self.currentDevice, configElement.value)
+		if self.currentDevice != "" and inputDevices.currentDevice == "":
+			inputDevices.setDeviceName(self.currentDevice, configElement.value)
 			if configElement.value != "":
-				devname = iInputDevices.getDeviceAttribute(self.currentDevice, 'name')
+				devname = inputDevices.getDeviceAttribute(self.currentDevice, 'name')
 				if devname != configElement.value:
 					configItem = getattr(config.inputDevices, "%s.enabled" % self.currentDevice)
 					configItem.value = False
 					configItem.save()
-		elif iInputDevices.currentDevice != "":
-			iInputDevices.setDeviceName(iInputDevices.currentDevice, configElement.value)
+		elif inputDevices.currentDevice != "":
+			inputDevices.setDeviceName(inputDevices.currentDevice, configElement.value)
 
 	def inputDevicesDelayChanged(self, configElement):
-		if self.currentDevice != "" and iInputDevices.currentDevice == "":
-			iInputDevices.setDeviceDelay(self.currentDevice, configElement.value)
-		elif iInputDevices.currentDevice != "":
-			iInputDevices.setDeviceDelay(iInputDevices.currentDevice, configElement.value)
+		if self.currentDevice != "" and inputDevices.currentDevice == "":
+			inputDevices.setDeviceDelay(self.currentDevice, configElement.value)
+		elif inputDevices.currentDevice != "":
+			inputDevices.setDeviceDelay(inputDevices.currentDevice, configElement.value)
 
 	def inputDevicesRepeatChanged(self, configElement):
-		if self.currentDevice != "" and iInputDevices.currentDevice == "":
-			iInputDevices.setDeviceRepeat(self.currentDevice, configElement.value)
-		elif iInputDevices.currentDevice != "":
-			iInputDevices.setDeviceRepeat(iInputDevices.currentDevice, configElement.value)
+		if self.currentDevice != "" and inputDevices.currentDevice == "":
+			inputDevices.setDeviceRepeat(self.currentDevice, configElement.value)
+		elif inputDevices.currentDevice != "":
+			inputDevices.setDeviceRepeat(inputDevices.currentDevice, configElement.value)
 
 
-iInputDevices = InputDevices()
-keyboard = Keyboard()
+inputDevices = InputDevices()
+iInputDevices = inputDevices # Deprecated support old plugins
 
 
 class RcTypeControl():
@@ -425,4 +417,5 @@ class RcTypeControl():
 
 
 iRcTypeControl = RcTypeControl()
+keyboard = Keyboard()
 remoteControl = RemoteControl()
