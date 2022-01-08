@@ -8,6 +8,9 @@
 #include <lib/gdi/grc.h>
 #endif
 #include <time.h>
+#ifdef USE_LIBVUGLES2
+#include <vuplus_gles.h>
+#endif
 
 #ifdef CONFIG_ION
 extern void bcm_accel_blit(
@@ -158,7 +161,29 @@ void gFBDC::exec(const gOpcode *o)
 		break;
 	}
 	case gOpcode::flush:
+#ifdef USE_LIBVUGLES2
+		if (gles_is_animation())
+			gles_do_animation();
+		else
+			fb->blit();
+#else
 		fb->blit();
+#endif
+		break;
+	case gOpcode::sendShow:
+	{
+#ifdef USE_LIBVUGLES2
+		gles_set_buffer((unsigned int *)surface.data);
+		gles_set_animation(1, o->parm.setShowHideInfo->point.x(), o->parm.setShowHideInfo->point.y(), o->parm.setShowHideInfo->size.width(), o->parm.setShowHideInfo->size.height());
+#endif
+		break;
+	}
+	case gOpcode::sendHide:
+	{
+#ifdef USE_LIBVUGLES2
+		gles_set_buffer((unsigned int *)surface.data);
+		gles_set_animation(0, o->parm.setShowHideInfo->point.x(), o->parm.setShowHideInfo->point.y(), o->parm.setShowHideInfo->size.width(), o->parm.setShowHideInfo->size.height());
+#endif
 
 #ifdef CONFIG_ION
 		if (surface_back.data_phys)
@@ -183,6 +208,14 @@ void gFBDC::exec(const gOpcode *o)
 		}
 #endif
 		break;
+	}
+#ifdef USE_LIBVUGLES2
+	case gOpcode::setView:
+	{
+		gles_viewport(o->parm.setViewInfo->size.width(), o->parm.setViewInfo->size.height(), fb->Stride());
+		break;
+	}
+#endif
 	default:
 		gDC::exec(o);
 		break;
