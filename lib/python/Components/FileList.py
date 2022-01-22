@@ -1,6 +1,7 @@
+from __future__ import print_function
 import os
 import re
-from MenuList import MenuList
+from Components.MenuList import MenuList
 from Components.Harddisk import harddiskmanager
 from Tools.Directories import SCOPE_GUISKIN, resolveFilename, fileExists
 from enigma import RT_HALIGN_LEFT, eListboxPythonMultiContent, eServiceReference, eServiceCenter, gFont
@@ -149,7 +150,7 @@ class FileList(MenuList):
 
 	def getCurrentEvent(self):
 		l = self.l.getCurrentSelection()
-		if not l or l[0][1] == True:
+		if not l or l[0][1]:
 			return None
 		else:
 			return self.serviceHandler.info(l[0][0]).getEvent(l[0][0])
@@ -353,7 +354,7 @@ class MultiFileSelectList(FileList):
 			newList = self.list[:]
 			x = self.list[idx]
 			if x and len(x[0]) > 2 and not x[0][3].startswith('<'):
-				if x[0][1] is True:
+				if x[0][1]:
 					realPathname = x[0][0]
 				else:
 					realPathname = self.current_directory + x[0][0]
@@ -365,7 +366,7 @@ class MultiFileSelectList(FileList):
 						try:
 							self.selectedFiles.remove(os.path.normpath(realPathname))
 						except (IOError, OSError) as err:
-							print "[FileList] Error %d: Can't remove '%s'!  (%s)" % (err.errno, realPathname, err.strerror)
+							print("[FileList] Error %d: Can't remove '%s'!  (%s)" % (err.errno, realPathname, err.strerror))
 				else:
 					SelectState = True
 					if (realPathname not in self.selectedFiles) and (os.path.normpath(realPathname) not in self.selectedFiles):

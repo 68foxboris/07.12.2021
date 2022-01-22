@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 from Screens.Screen import Screen
 from Components.Sources.CurrentService import CurrentService
 from Components.Sources.EventInfo import EventInfo
@@ -8,7 +10,7 @@ from Components.Sources.TunerInfo import TunerInfo
 from Components.Sources.Boolean import Boolean
 from Components.Sources.RecordState import RecordState
 from Components.Converter.Combine import Combine
-from Components.Renderer.FrontpanelLed import FrontpanelLed, PATTERN_OFF, PATTERN_BLINK
+from Components.Renderer.FrontpanelLed import FrontpanelLed
 from Components.config import config
 from Components.SystemInfo import BoxInfo
 

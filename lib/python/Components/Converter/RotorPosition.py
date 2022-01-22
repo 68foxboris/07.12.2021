@@ -1,5 +1,7 @@
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
-from Converter import Converter
+from __future__ import print_function
+from Components.Converter.Converter import Converter
 from Components.Element import cached
 from Components.config import config
 from Tools.Transponder import orbpos
@@ -41,7 +43,7 @@ class RotorPosition(Converter):
 			elif value == "all":
 				all_text = ""
 				for x in nimmanager.nim_slots:
-					print x.slot
+					print(x.slot)
 					nim_text = nimmanager.rotorLastPositionForNim(x.slot, number=False)
 					if nim_text != _("rotor is not used"):
 						if nim_text == _("undefined"):

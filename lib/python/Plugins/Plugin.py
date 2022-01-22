@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 from os.path import join as pathjoin
 from Components.config import ConfigSubsection, config
 from Tools.LoadPixmap import LoadPixmap
@@ -87,6 +89,9 @@ class PluginDescriptor:
 
 		self.__call__ = fnc
 
+	def __call__(self, *args, **kwargs):
+		return
+
 	def updateIcon(self, path):
 		self.path = path
 
@@ -96,6 +101,7 @@ class PluginDescriptor:
 	@property
 	def icon(self):
 		if self.iconstr and self.path:
+			from Tools.LoadPixmap import LoadPixmap
 			return LoadPixmap(pathjoin(self.path, self.iconstr))
 		else:
 			return self._icon

@@ -1,10 +1,11 @@
+from __future__ import print_function
 from datetime import datetime
 from time import localtime, mktime, time, strftime
 import urllib
 
 from enigma import eEPGCache, iRecordableServicePtr
 
-import ChannelSelection
+from Screens import ChannelSelection
 from RecordTimer import AFTEREVENT
 from ServiceReference import ServiceReference
 from Components.ActionMap import HelpableNumberActionMap

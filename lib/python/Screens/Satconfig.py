@@ -1,5 +1,7 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 from enigma import eDVBDB, getLinkedSlotID, eDVBResourceManager
-from Screen import Screen
+from Screens.Screen import Screen
 from Components.SystemInfo import BoxInfo
 from Components.ActionMap import ActionMap
 from Components.ConfigList import ConfigListScreen
@@ -754,7 +756,6 @@ class NimSetup(Screen, ConfigListScreen, ServiceStopScreen):
 		if cc.upper() in self.countrycodes:
 			return self.countrycodes[cc.upper()]
 		return cc
-
 
 class NimSelection(Screen):
 	def __init__(self, session):

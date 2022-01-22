@@ -1,5 +1,7 @@
-# -*- coding: UTF-8 -*-
-from Screen import Screen
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+from __future__ import print_function
+from Screens.Screen import Screen
 from Screens.ParentalControlSetup import ProtectedScreen
 from enigma import eConsoleAppContainer, eDVBDB, eTimer, eSize, ePoint, getDesktop
 
@@ -158,7 +160,7 @@ class PluginBrowser(Screen, ProtectedScreen):
 
 	def run(self):
 		plugin = self["list"].l.getCurrentSelection()[0]
-		plugin(session=self.session)
+		plugin.__call__(session=self.session)
 		self.help = False
 
 	def setDefaultList(self, answer):
@@ -427,8 +429,8 @@ class PluginDownloadBrowser(Screen):
 		if hasattr(self, 'postInstallCall'):
 			try:
 				self.postInstallCall()
-			except Exception, ex:
-				print "[PluginBrowser] postInstallCall failed:", ex
+			except Exception as ex:
+				print("[PluginBrowser] postInstallCall failed:", ex)
 			self.resetPostInstall()
 		try:
 			os.unlink('/tmp/opkg.conf')
@@ -468,18 +470,20 @@ class PluginDownloadBrowser(Screen):
 				pluginlist.sort()
 				self.updateList()
 				self["list"].instance.show()
+				self["text"].setText("")
 			else:
 				self["text"].setText(_("No new plugins found"))
 		else:
 			if self.pluginlist:
 				self.updateList()
 				self["list"].instance.show()
+				self["text"].setText("")
 			else:
 				self["text"].setText(_("No new plugins found"))
 
 	def dataAvail(self, str):
 		#prepend any remaining data from the previous call
-		str = self.remainingdata + str
+		str = self.remainingdata + str.decode()
 		#split in lines
 		lines = str.split('\n')
 		#'str' should end with '\n', so when splitting, the last line should be empty. If this is not the case, we received an incomplete line

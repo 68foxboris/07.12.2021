@@ -4,7 +4,7 @@ import shutil
 import tempfile
 import struct
 import time
-import urllib2
+from urllib.request import urlopen
 import zipfile
 
 from enigma import eEPGCache
@@ -82,9 +82,9 @@ class SelectImage(Screen):
 		if not self.imagesList:
 			if not self.jsonlist:
 				try:
-					self.jsonlist = dict(json.load(urllib2.urlopen('http://downloads.openpli.org/json/%s' % model)))
+					self.jsonlist = dict(json.load(urlopen('http://downloads.openpli.org/json/%s' % model)))
 					if config.usage.alternative_imagefeed.value:
-						self.jsonlist.update(dict(json.load(urllib2.urlopen('%s%s' % (config.usage.alternative_imagefeed.value, model)))))
+						self.jsonlist.update(dict(json.load(urlopen('%s%s' % (config.usage.alternative_imagefeed.value, model)))))
 				except:
 					pass
 			self.imagesList = dict(self.jsonlist)
@@ -320,7 +320,7 @@ class FlashImage(Screen):
 		if retval == 0:
 			self.startDownload()
 		else:
-			self.session.openWithCallback(self.abort, MessageBox, _("Error during backup settings\n%s") % retval, type=MessageBox.TYPE_ERROR, simple=True)
+			self.session.openWithCallback(self.abort, MessageBox, _("Error during backup settings\n%s") % reval, type=MessageBox.TYPE_ERROR, simple=True)
 
 	def startDownload(self, reply=True):
 		self.show()

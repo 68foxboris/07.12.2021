@@ -1,5 +1,7 @@
-from Pixmap import PixmapConditional
-from ConditionalWidget import BlinkingWidgetConditional, BlinkingWidget
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+from Components.Pixmap import PixmapConditional
+from Components.ConditionalWidget import BlinkingWidgetConditional, BlinkingWidget
 
 
 class BlinkingPixmap(BlinkingWidget):

@@ -1,8 +1,10 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 from Plugins.Plugin import PluginDescriptor
 
 
 def CutListEditor(session, service=None):
-	import ui
+	from . import ui
 	return ui.CutListEditor(session, service)
 
 

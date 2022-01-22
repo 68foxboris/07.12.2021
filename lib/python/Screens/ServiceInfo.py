@@ -1,5 +1,8 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+from __future__ import print_function
 from Components.GUIComponent import GUIComponent
-from Screen import Screen
+from Screens.Screen import Screen
 from Screens.AudioSelection import AudioSelection
 from Components.ActionMap import ActionMap
 from Components.Label import Label
@@ -25,7 +28,7 @@ def to_unsigned(x):
 
 
 def ServiceInfoListEntry(a, b="", valueType=TYPE_TEXT, param=4, altColor=False):
-	print "b:", b
+	print("b:", b)
 	if not isinstance(b, str):
 		if valueType == TYPE_VALUE_HEX:
 			b = ("%0" + str(param) + "X") % to_unsigned(b)
@@ -53,7 +56,7 @@ def ServiceInfoListEntry(a, b="", valueType=TYPE_TEXT, param=4, altColor=False):
 		res.append((eListboxPythonMultiContent.TYPE_TEXT, xa, ya, wa, ha, 0, RT_HALIGN_LEFT | RT_VALIGN_CENTER, a))
 		res.append((eListboxPythonMultiContent.TYPE_TEXT, xb, yb, wb, hb, 0, RT_HALIGN_LEFT | RT_VALIGN_CENTER, b))
 	else:
-		res.append((eListboxPythonMultiContent.TYPE_TEXT, xa, ya, wa + wb, ha, 0, RT_HALIGN_LEFT | RT_VALIGN_CENTER, a, color if altColor is True else None)) # spread horizontally
+		res.append((eListboxPythonMultiContent.TYPE_TEXT, xa, ya, wa + wb, ha, 0, RT_HALIGN_LEFT | RT_VALIGN_CENTER, a, color if altColor else None)) # spread horizontally
 	return res
 
 
@@ -182,7 +185,7 @@ class ServiceInfo(Screen):
 					#live dvb-s-t
 						fillList = fillList + [(_("Service reference"), refstr, TYPE_TEXT)]
 				self.audio = self.service and self.service.audioTracks()
-				self.numberofTracks = self.audio and self.audio.getNumberOfTracks()
+				self.numberofTracks = self.audio.getNumberOfTracks() if self.audio else 0
 				self.subList = self.getSubtitleList()
 				self.togglePIDButton()
 				trackList = self.getTrackList()

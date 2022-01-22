@@ -1,8 +1,12 @@
-from Wizard import wizardManager
-from Screen import Screen
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+from __future__ import print_function
+from Screens.Screen import Screen
+from Screens.Wizard import wizardManager
 from Screens.MessageBox import MessageBox
 from Screens.WizardLanguage import WizardLanguage
 from Screens.HelpMenu import ShowRemoteControl
+from Components.SystemInfo import BoxInfo
 try:
 	from Plugins.SystemPlugins.OSDPositionSetup.overscanwizard import OverscanWizard
 except:
@@ -13,14 +17,14 @@ from Components.ProgressBar import ProgressBar
 from Components.Label import Label
 from Components.ScrollLabel import ScrollLabel
 from Components.config import config, ConfigBoolean, configfile
-from LanguageSelection import LanguageWizard
+from Screens.LanguageSelection import LanguageWizard
 from enigma import eConsoleAppContainer, eTimer, eActionMap
 
 import os
 
 config.misc.firstrun = ConfigBoolean(default=True)
 config.misc.languageselected = ConfigBoolean(default=True)
-config.misc.do_overscanwizard = ConfigBoolean(default=OverscanWizard and config.skin.primary_skin.value == "PLi-FullNightHD/skin.xml")
+config.misc.do_overscanwizard = ConfigBoolean(default=OverscanWizard)
 
 
 class StartWizard(WizardLanguage, ShowRemoteControl):
@@ -125,12 +129,13 @@ class AutoInstallWizard(Screen):
 		self["header"].setText(_("Autoinstalling %s") % self.package + " - %s%%" % self["progress"].value)
 		try:
 			if self.container.execute('opkg install "%s"' % self.package):
-				raise Exception, "failed to execute command!"
+				raise Exception("failed to execute command!")
 				self.appClosed(True)
-		except Exception, e:
+		except Exception as e:
 			self.appClosed(True)
 
 	def dataAvail(self, data):
+		data = data.decode()
 		self["AboutScrollLabel"].appendText(data)
 		self.logfile.write(data)
 

@@ -1,5 +1,5 @@
-from GUIComponent import GUIComponent
-from config import KEY_LEFT, KEY_RIGHT, KEY_HOME, KEY_END, KEY_0, KEY_DELETE, KEY_BACKSPACE, KEY_OK, KEY_TOGGLEOW, KEY_ASCII, KEY_TIMEOUT, KEY_NUMBERS, ConfigElement
+from Components.GUIComponent import GUIComponent
+from Components.config import KEY_LEFT, KEY_RIGHT, KEY_HOME, KEY_END, KEY_0, KEY_DELETE, KEY_BACKSPACE, KEY_OK, KEY_TOGGLEOW, KEY_ASCII, KEY_TIMEOUT, KEY_NUMBERS, ConfigElement
 from Components.ActionMap import NumberActionMap, ActionMap
 from enigma import eListbox, eListboxPythonConfigContent, eRCInput, eTimer
 from Screens.MessageBox import MessageBox
@@ -180,9 +180,6 @@ class ConfigListScreen:
 		self.setup_title = self.getTitle()
 		from Screens.Setup import SetupSummary
 		return SetupSummary
-
-	def getCurrentItem(self):
-		return self["config"].getCurrent() and self["config"].getCurrent()[1] or None
 
 	def getCurrentEntry(self):
 		return self["config"].getCurrent() and self["config"].getCurrent()[0] or ""

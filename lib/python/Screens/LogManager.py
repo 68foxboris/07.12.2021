@@ -1,3 +1,4 @@
+from __future__ import print_function
 from Screens.Screen import Screen
 from Components.GUIComponent import GUIComponent
 from Components.VariableText import VariableText
@@ -27,7 +28,10 @@ import base64
 # Here are the email package modules we'll need
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.Utils import formatdate
+if sys.version_info[0] >= 3:
+	from email.utils import formatdate
+else:
+	from email.Utils import formatdate
 
 _session = None
 
@@ -40,7 +44,7 @@ def getSkinFactor(refresh = False):
 			if not skinfactor in [1, 1.5, 3]:
 				print('[SKIN] getSkinFactor unknown result (%s) -> set skinfactor to 1' %skinfactor)
 				skinfactor = 1
-		except Exception, err:
+		except Exception as err:
 			skinfactor = 1
 			print('[SKIN] getSkinFactor failed: ', err)
 	return skinfactor
@@ -189,7 +193,7 @@ class LogManagerPoller:
 					candidates.sort()
 					# Now we have a list of ctime, candidates, size. Sorted by ctime (=deletion time)
 					for st_ctime, fn, st_size in candidates:
-						print("[LogManager] " + str(logsfolder) + ": bytesToRemove", bytesToRemove)
+						print(("[LogManager] " + str(logsfolder) + ": bytesToRemove", bytesToRemove))
 						if bytesToRemove < 0:
 							break
 						eBackgroundFileEraser.getInstance().erase(fn)

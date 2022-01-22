@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: iso-8859-1 -*-
 from Components.Console import Console
 from Components.About import about
 from Components.PackageInfo import PackageInfoHandler
@@ -9,6 +9,7 @@ from Components.Network import iNetwork
 from Tools.Directories import resolveFilename, SCOPE_METADIR
 from Components.SystemInfo import BoxInfo
 from time import time
+import six
 
 
 class SoftwareTools(PackageInfoHandler):
@@ -59,14 +60,14 @@ class SoftwareTools(PackageInfoHandler):
 		if self.lastDownloadDate is None:
 				if self.NetworkConnectionAvailable == True:
 					self.lastDownloadDate = time()
-					if self.list_updating is False and callback is None:
+					if not self.list_updating and callback is None:
 						self.list_updating = True
 						self.opkg.startCmd(OpkgComponent.CMD_UPDATE)
-					elif self.list_updating is False and callback is not None:
+					elif not self.list_updating and callback is not None:
 						self.list_updating = True
 						self.NotifierCallback = callback
 						self.opkg.startCmd(OpkgComponent.CMD_UPDATE)
-					elif self.list_updating is True and callback is not None:
+					elif self.list_updating and callback is not None:
 						self.NotifierCallback = callback
 				else:
 					self.list_updating = False
@@ -77,14 +78,14 @@ class SoftwareTools(PackageInfoHandler):
 		else:
 			if self.NetworkConnectionAvailable == True:
 				self.lastDownloadDate = time()
-				if self.list_updating is False and callback is None:
+				if not self.list_updating and callback is None:
 					self.list_updating = True
 					self.opkg.startCmd(OpkgComponent.CMD_UPDATE)
-				elif self.list_updating is False and callback is not None:
+				elif not self.list_updating and callback is not None:
 					self.list_updating = True
 					self.NotifierCallback = callback
 					self.opkg.startCmd(OpkgComponent.CMD_UPDATE)
-				elif self.list_updating is True and callback is not None:
+				elif self.list_updating and callback is not None:
 					self.NotifierCallback = callback
 			else:
 				if self.list_updating and callback is not None:
@@ -117,8 +118,9 @@ class SoftwareTools(PackageInfoHandler):
 			self.UpdateConsole.ePopen(cmd, self.OpkgListAvailableCB, callback)
 
 	def OpkgListAvailableCB(self, result, retval, extra_args=None):
-		(callback) = extra_args
+		(callback) = extra_args or None
 		if result:
+			result = six.ensure_str(result)
 			if self.list_updating:
 				self.available_packetlist = []
 				for x in result.splitlines():
@@ -155,8 +157,9 @@ class SoftwareTools(PackageInfoHandler):
 				self.InstallMetaPackageCB(True)
 
 	def InstallMetaPackageCB(self, result, retval=None, extra_args=None):
-		(callback) = extra_args
+		(callback) = extra_args or None
 		if result:
+			result = six.ensure_str(result)
 			self.fillPackagesIndexList()
 			if callback is None:
 				self.startOpkgListInstalled()
@@ -181,8 +184,9 @@ class SoftwareTools(PackageInfoHandler):
 			self.UpdateConsole.ePopen(cmd, self.OpkgListInstalledCB, callback)
 
 	def OpkgListInstalledCB(self, result, retval, extra_args=None):
-		(callback) = extra_args
+		(callback) = extra_args or None
 		if result:
+			result = six.ensure_str(result)
 			self.installed_packetlist = {}
 			for x in result.splitlines():
 				tokens = x.split(' - ')
@@ -242,7 +246,7 @@ class SoftwareTools(PackageInfoHandler):
 		self.Console.ePopen(cmd, self.OpkgUpdateCB, callback)
 
 	def OpkgUpdateCB(self, result, retval, extra_args=None):
-		(callback) = extra_args
+		(callback) = extra_args or None
 		if result:
 			if self.Console:
 				if not self.Console.appContainers:

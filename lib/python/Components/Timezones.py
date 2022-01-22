@@ -1,9 +1,10 @@
+from __future__ import print_function
 from errno import ENOENT
 from os import environ, path, symlink, unlink, walk
 from os.path import exists, isfile, join as pathjoin, realpath
 from six import PY2
 from time import gmtime, localtime, strftime, time, tzset
-from xml.etree.cElementTree import ParseError, parse
+from xml.etree.ElementTree import ParseError, parse
 
 from Components.config import ConfigSelection, ConfigSubsection, config
 from Tools.Directories import fileReadXML, fileWriteLine
@@ -130,9 +131,6 @@ class Timezones:
 				name = commonTimezoneNames.get(tz, zone)  # Use the more common name if one is defined.
 				if name is None:
 					continue
-				name = name.encode(encoding="UTF-8", errors="ignore") if PY2 else name
-				area = area.encode(encoding="UTF-8", errors="ignore") if PY2 else area
-				zone = zone.encode(encoding="UTF-8", errors="ignore") if PY2 else zone
 				zones.append((zone, name.replace("_", " ")))
 			if area:
 				if area in self.timezones:

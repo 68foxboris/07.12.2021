@@ -1,5 +1,6 @@
+from __future__ import print_function
 import errno
-import xml.etree.cElementTree
+import xml.etree.ElementTree
 
 from enigma import addFont, eLabel, ePixmap, ePoint, eRect, eSize, eWindow, eWindowStyleManager, eWindowStyleSkinned, getDesktop, gFont, getFontFaces, gRGB, BT_ALPHATEST, BT_ALPHABLEND
 from os.path import basename, dirname, isfile
@@ -128,7 +129,7 @@ def loadSkin(filename, scope=SCOPE_SKINS, desktop=getDesktop(GUI_SKIN_ID), scree
 	try:
 		with open(filename, "r") as fd:  # This open gets around a possible file handle leak in Python's XML parser.
 			try:
-				domSkin = xml.etree.cElementTree.parse(fd).getroot()
+				domSkin = xml.etree.ElementTree.parse(fd).getroot()
 				# print("[Skin] DEBUG: Extracting non screen blocks from '%s'.  (scope='%s')" % (filename, scope))
 				# For loadSingleSkinData colors, bordersets etc. are applied one after
 				# the other in order of ascending priority.
@@ -146,9 +147,9 @@ def loadSkin(filename, scope=SCOPE_SKINS, desktop=getDesktop(GUI_SKIN_ID), scree
 						if scrnID is not None:  # Without an scrnID, it is useless!
 							scrnID = int(scrnID)
 							# print("[Skin] DEBUG: Processing a windowstyle ID='%s'." % scrnID)
-							domStyle = xml.etree.cElementTree.ElementTree(xml.etree.cElementTree.Element("skin"))
+							domStyle = xml.etree.ElementTree.ElementTree(xml.etree.ElementTree.Element("skin"))
 							domStyle.getroot().append(element)
-							windowStyles[scrnID] = (desktop, screenID, domStyle, filename, scope)
+							windowStyles[scrnID] = (desktop, screenID, domStyle.getroot(), filename, scope)
 					# Element is not a screen or windowstyle element so no need for it any longer.
 				reloadWindowStyles()  # Reload the window style to ensure all skin changes are taken into account.
 				print("[Skin] Loading skin file '%s' complete." % filename)
@@ -157,7 +158,7 @@ def loadSkin(filename, scope=SCOPE_SKINS, desktop=getDesktop(GUI_SKIN_ID), scree
 						if method:
 							method()
 				return True
-			except xml.etree.cElementTree.ParseError as err:
+			except xml.etree.ElementTree.ParseError as err:
 				fd.seek(0)
 				content = fd.readlines()
 				line, column = err.position
@@ -305,7 +306,7 @@ def parseValuePair(s, scale, object=None, desktop=None, size=None):
 		parentsize = getParentSize(object, desktop)
 	xval = parseCoordinate(x, parentsize.width(), size and size.width() or 0)
 	yval = parseCoordinate(y, parentsize.height(), size and size.height() or 0)
-	return (xval * scale[0][0] / scale[0][1], yval * scale[1][0] / scale[1][1])
+	return (xval * scale[0][0] // scale[0][1], yval * scale[1][0] // scale[1][1])
 
 
 def parsePosition(s, scale, object=None, desktop=None, size=None):
@@ -342,7 +343,7 @@ def parseFont(s, scale=((1, 1), (1, 1))):
 			print("[Skin] Error: Font '%s' (in '%s') is not defined!  Using 'Body' font ('%s') instead." % (name, s, f[0]))
 			name = f[0]
 			size = f[1] if size is None else size
-	return gFont(name, int(size) * scale[0][0] / scale[0][1])
+	return gFont(name, int(size) * scale[0][0] // scale[0][1])
 
 
 def parseColor(s):
@@ -415,14 +416,14 @@ def collectAttributes(skinAttributes, node, context, skinPath=None, ignore=(), f
 			# listbox; when the scrollbar setting is applied after the size, a scrollbar
 			# will not be shown until the selection moves for the first time.
 			if attrib == "size":
-				size = value.encode("utf-8")
+				size = value
 			elif attrib == "position":
-				pos = value.encode("utf-8")
+				pos = value
 			elif attrib == "font":
-				font = value.encode("utf-8")
+				font = value
 				skinAttributes.append((attrib, font))
 			else:
-				skinAttributes.append((attrib, value.encode("utf-8")))
+				skinAttributes.append((attrib, value))
 	if pos is not None:
 		pos, size = context.parse(pos, size, font)
 		skinAttributes.append(("position", pos))
@@ -574,7 +575,7 @@ class AttributeParser:
 
 	def textOffset(self, value):
 		x, y = value.split(",")
-		self.guiObject.setTextOffset(ePoint(int(x) * self.scaleTuple[0][0] / self.scaleTuple[0][1], int(y) * self.scaleTuple[1][0] / self.scaleTuple[1][1]))
+		self.guiObject.setTextOffset(ePoint(int(x) * self.scaleTuple[0][0] // self.scaleTuple[0][1], int(y) * self.scaleTuple[1][0] // self.scaleTuple[1][1]))
 
 	def flags(self, value):
 		flags = value.split(",")
@@ -842,7 +843,7 @@ def loadSingleSkinData(desktop, screenID, domSkin, pathSkin, scope=SCOPE_GUISKIN
 			try:
 				name = parameter.attrib.get("name")
 				value = parameter.attrib.get("value")
-				parameters[name] = map(parseParameter, [x.strip() for x in value.split(",")]) if "," in value else parseParameter(value)
+				parameters[name] = list(map(parseParameter, [x.strip() for x in value.split(",")])) if "," in value else parseParameter(value)
 			except Exception as err:
 				raise SkinError("Bad parameter: '%s'" % str(err))
 	for tag in domSkin.findall("menus"):
@@ -1068,7 +1069,7 @@ def readSkin(screen, skin, names, desktop):
 		print("[Skin] Parsing embedded skin '%s'." % name)
 		if isinstance(skin, tuple):
 			for s in skin:
-				candidate = xml.etree.cElementTree.fromstring(s)
+				candidate = xml.etree.ElementTree.fromstring(s)
 				if candidate.tag == "screen":
 					screenID = candidate.attrib.get("id", None)
 					if (not screenID) or (int(screenID) == DISPLAY_SKIN_ID):
@@ -1077,12 +1078,12 @@ def readSkin(screen, skin, names, desktop):
 			else:
 				print("[Skin] No suitable screen found!")
 		else:
-			myScreen = xml.etree.cElementTree.fromstring(skin)
+			myScreen = xml.etree.ElementTree.fromstring(skin)
 		if myScreen:
 			screen.parsedSkin = myScreen
 	if myScreen is None:
 		print("[Skin] No skin to read or screen to display.")
-		myScreen = screen.parsedSkin = xml.etree.cElementTree.fromstring("<screen></screen>")
+		myScreen = screen.parsedSkin = xml.etree.ElementTree.fromstring("<screen></screen>")
 	screen.skinAttributes = []
 	skinPath = getattr(screen, "skin_path", path)
 	context = SkinContextStack()
@@ -1204,7 +1205,7 @@ def readSkin(screen, skin, names, desktop):
 		screen.additionalWidgets.append(w)
 
 	def processScreen(widget, context):
-		for w in widget.getchildren():
+		for w in widget:
 			conditional = w.attrib.get("conditional")
 			if conditional and not [i for i in conditional.split(",") if i in screen.keys()]:
 				continue

@@ -1,3 +1,4 @@
+from __future__ import print_function
 from fcntl import ioctl
 from os import O_NONBLOCK, O_RDWR, close as osclose, listdir, open as osopen, write as oswrite
 from os.path import isdir, isfile
@@ -15,8 +16,6 @@ from Tools.Directories import SCOPE_KEYMAPS, SCOPE_SKINS, fileReadLine, fileWrit
 
 from six import ensure_str
 MODULE_NAME = __name__.split(".")[-1]
-
-# BLACKLIST = ("dreambox front panel", "cec_input")  # Why was this being done?
 
 REMOTE_MODEL = 0
 REMOTE_RCTYPE = 1
@@ -65,17 +64,17 @@ class InputDevices:
 
 	def EVIOCGNAME(self, length):
 		# From include/uapi/asm-generic/ioctl.h and asm-generic/ioctl.h for HAVE_OLDE2_API
-		IOC_NRBITS = 8L
-		IOC_TYPEBITS = 8L
+		IOC_NRBITS = 8
+		IOC_TYPEBITS = 8
 		if BoxInfo.getItem("OLDE2API"):
-			IOC_SIZEBITS = 13L
+			IOC_SIZEBITS = 13
 		else:
-			IOC_SIZEBITS = 13L if "mips" in machine() else 14L
-		IOC_NRSHIFT = 0L
+			IOC_SIZEBITS = 13 if "mips" in machine() else 14
+		IOC_NRSHIFT = 0
 		IOC_TYPESHIFT = IOC_NRSHIFT + IOC_NRBITS
 		IOC_SIZESHIFT = IOC_TYPESHIFT + IOC_TYPEBITS
 		IOC_DIRSHIFT = IOC_SIZESHIFT + IOC_SIZEBITS
-		IOC_READ = 2L
+		IOC_READ = 2
 		return (IOC_READ << IOC_DIRSHIFT) | (length << IOC_SIZESHIFT) | (0x45 << IOC_TYPESHIFT) | (0x06 << IOC_NRSHIFT)
 
 	def getInputDeviceType(self, name):
@@ -88,11 +87,11 @@ class InputDevices:
 		elif "front panel" in name:
 			return "panel"
 		else:
-			# print("[InputDevice] Warning: Unknown device type: '%s'!" % name)
+			print("[InputDevice] Warning: Unknown device type: '%s'!" % name)
 			return None
 
 	def getDeviceList(self):
-		return sorted(list(self.devices.keys()))
+		return sorted(iter(self.devices.keys()))
 
 	# struct input_event {
 	# 	struct timeval time;    -> ignored
@@ -113,7 +112,7 @@ class InputDevices:
 
 	def setDeviceEnabled(self, device, value):
 		oldVal = self.getDeviceAttribute(device, "enabled")
-		# print("[InputDevice] setDeviceEnabled DEBUG: Set device '%s' to '%s' from '%s'." % (device, value, oldVal))
+		# print("[InputDevice] setDeviceEnabled for device '%s' to '%s' from '%s'." % (device,value,oldVal))
 		self.setDeviceAttribute(device, "enabled", value)
 		if oldVal is True and value is False:
 			self.setDeviceDefaults(device)
@@ -124,12 +123,12 @@ class InputDevices:
 		return "Unknown device name"
 
 	def setDeviceName(self, device, value):
-		# print("[InputDevice] setDeviceName DEBUG: Set device name from '%s' to '%s'." % (device, value))
+		# print("[InputDevice] setDeviceName for device name from '%s' to '%s'." % (device,value))
 		self.setDeviceAttribute(device, "configuredName", value)
 
 	def setDeviceDelay(self, device, value):  # REP_DELAY
 		if self.getDeviceAttribute(device, "enabled"):
-			# print("[InputDevice] setDeviceDelay DEBUG: Set device '%s' to %s ms." % (device, value))
+			# print("[InputDevice] setDeviceDelay for device '%s' to %d ms." % (device, value))
 			event = pack("LLHHi", 0, 0, 0x14, 0x00, int(value))
 			fd = osopen("/dev/input/%s" % device, O_RDWR)
 			oswrite(fd, event)
@@ -137,7 +136,7 @@ class InputDevices:
 
 	def setDeviceRepeat(self, device, value):  # REP_PERIOD
 		if self.getDeviceAttribute(device, "enabled"):
-			# print("[InputDevice] setDeviceRepeat DEBUG: Set device '%s' to %s ms." % (device, value))
+			# print("[InputDevice] setDeviceRepeat DEBUG: Set device '%s' to %d ms." % (device, value))
 			event = pack("LLHHi", 0, 0, 0x14, 0x01, int(value))
 			fd = osopen("/dev/input/%s" % device, O_RDWR)
 			oswrite(fd, event)
@@ -149,7 +148,7 @@ class InputDevices:
 		return None
 
 	def setDeviceAttribute(self, device, attribute, value):
-		# print("[InputDevice] setDeviceAttribute DEBUG: Set attribute '%s' for device '%s' to value '%s'." % (attribute, device, value))
+		# print "[InputDevices] setting for device", device, "attribute", attribute, " to value", value
 		if device in self.devices:
 			self.devices[device][attribute] = value
 
@@ -217,7 +216,7 @@ class RemoteControl:
 				codeName = remote.attrib.get("codeName")
 				displayName = remote.attrib.get("displayName")
 				if codeName and displayName:
-					print("[InputDevice] Adding remote control for '%s'." % displayName)
+					print("[InputDevice] Adding remote control identifier for '%s'." % displayName)
 					self.remotes.append((model, rcType, codeName, displayName))
 		self.remotes.insert(0, ("", "", "", _("Default")))
 		if BoxInfo.getItem("RemoteTypeZeroAllowed", False):
@@ -345,7 +344,7 @@ class RemoteControl:
 class InitInputDevices:
 	def __init__(self):
 		self.currentDevice = ""
-		for device in sorted(list(inputDevices.devices.keys())):
+		for device in sorted(iter(inputDevices.devices.keys())):
 			print("[InputDevice] InitInputDevices DEBUG: Creating config entry for device: '%s' -> '%s'." % (device, inputDevices.devices[device]["name"]))
 			self.currentDevice = device
 			self.setupConfigEntries(self.currentDevice)

@@ -1,10 +1,11 @@
+from __future__ import print_function
 from ServiceReference import ServiceReference
 from Components.config import config
 from Screens.MessageBox import MessageBox
 from timer import TimerEntry as TimerObject
-from urllib import quote
-import xml
-from base64 import encodestring
+from urllib.parse import quote
+from xml.etree.ElementTree import fromstring
+from base64 import encodebytes
 
 
 class FallbackTimerList():
@@ -19,7 +20,7 @@ class FallbackTimerList():
 			if config.usage.remote_fallback_openwebif_customize.value:
 				self.url = "%s:%s" % (self.url, config.usage.remote_fallback_openwebif_port.value)
 				if config.usage.remote_fallback_openwebif_userid.value and config.usage.remote_fallback_openwebif_password.value:
-					self.headers = {"Authorization": "Basic %s" % encodestring("%s:%s" % (config.usage.remote_fallback_openwebif_userid.value, config.usage.remote_fallback_openwebif_password.value)).strip()}
+					self.headers = {"Authorization": "Basic %s" % encodebytes(("%s:%s" % (config.usage.remote_fallback_openwebif_userid.value, config.usage.remote_fallback_openwebif_password.value)).encode("UTF-8")).strip()}
 			self.getFallbackTimerList()
 		else:
 			self.url = None
@@ -34,7 +35,7 @@ class FallbackTimerList():
 		return service_ref
 
 	def getUrl(self, url):
-		print "[FallbackTimer] getURL", url
+		print("[FallbackTimer] getURL", url)
 		from twisted.web.client import getPage
 		return getPage("%s/%s" % (self.url, url), headers=self.headers)
 
@@ -50,8 +51,8 @@ class FallbackTimerList():
 
 	def gotFallbackTimerList(self, data):
 		try:
-			root = xml.etree.cElementTree.fromstring(data)
-		except Exception, e:
+			root = fromstring(data)
+		except Exception as e:
 			self.fallback(e)
 		self.list = [
 				FallbackTimerClass(
@@ -71,7 +72,7 @@ class FallbackTimerList():
 					description=str(timer.findtext("e2description", '').encode("utf-8", 'ignore')))
 			for timer in root.findall("e2timer")
 		]
-		print "[FallbackTimer] read %s timers from fallback tuner" % len(self.list)
+		print("[FallbackTimer] read %s timers from fallback tuner" % len(self.list))
 		self.parent.session.nav.RecordTimer.setFallbackTimerList(self.list)
 		self.fallback()
 
@@ -134,7 +135,7 @@ class FallbackTimerList():
 
 	def getUrlFallback(self, data):
 		try:
-			root = xml.etree.cElementTree.fromstring(data)
+			root = fromstring(data)
 			if root[0].text == 'True':
 				self.getFallbackTimerList()
 			else:
@@ -164,14 +165,14 @@ class FallbackTimerDirs(FallbackTimerList):
 			self.fallbackFunction()
 
 	def getlocations(self, data):
-		self.locations = [c.text for c in xml.etree.ElementTree.fromstring(data)]
+		self.locations = [c.text for c in fromstring(data)]
 		try:
 			self.getUrl("web/getcurrlocation").addCallback(self.getcurrlocation).addErrback(self.fallbackFunction)
 		except:
 			self.fallbackFunction()
 
 	def getcurrlocation(self, data):
-		currlocation = [c.text for c in xml.etree.ElementTree.fromstring(data)]
+		currlocation = [c.text for c in fromstring(data)]
 		if currlocation:
 			self.fallbackFunction(currlocation[0], self.locations)
 		else:
