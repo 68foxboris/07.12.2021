@@ -1821,10 +1821,10 @@ PyObject *eEPGCache::lookupEvent(ePyObject list, ePyObject convertFunc)
 						}
 						break;
 					case 2:
-						event_id=stime=PyInt_AsLong(entry);
+						event_id=stime=PyLong_AsLong(entry);
 						break;
 					case 3:
-						minutes=PyInt_AsLong(entry);
+						minutes=PyLong_AsLong(entry);
 						break;
 					default:
 						eDebug("[eEPGCache] unneeded extra argument");
@@ -2241,9 +2241,9 @@ void eEPGCache::importEvents(ePyObject serviceReferences, ePyObject list)
 			eDebug("[eEPGCache:import] serviceReferences tuple must contain 3 numbers (onid, tsid, sid), aborting");
 			return;
 		}
-		int onid = PyInt_AsLong(PyTuple_GET_ITEM(serviceReferences, 0));
-		int tsid = PyInt_AsLong(PyTuple_GET_ITEM(serviceReferences, 1));
-		int sid = PyInt_AsLong(PyTuple_GET_ITEM(serviceReferences, 2));
+		int onid = PyLong_AsLong(PyTuple_GET_ITEM(serviceReferences, 0));
+		int tsid = PyLong_AsLong(PyTuple_GET_ITEM(serviceReferences, 1));
+		int sid = PyLong_AsLong(PyTuple_GET_ITEM(serviceReferences, 2));
 		refs.push_back(eServiceReferenceDVB(0, tsid, onid, sid, 0));
 	}
 	else if (PyList_Check(serviceReferences))
@@ -2271,9 +2271,9 @@ void eEPGCache::importEvents(ePyObject serviceReferences, ePyObject list)
 				{
 					eDebug("[eEPGCache:import] serviceReferences[%d] tuple must contain 3 numbers (onid, tsid, sid)", i);
 				}
-				int onid = PyInt_AsLong(PyTuple_GET_ITEM(item, 0));
-				int tsid = PyInt_AsLong(PyTuple_GET_ITEM(item, 1));
-				int sid = PyInt_AsLong(PyTuple_GET_ITEM(item, 2));
+				int onid = PyLong_AsLong(PyTuple_GET_ITEM(item, 0));
+				int tsid = PyLong_AsLong(PyTuple_GET_ITEM(item, 1));
+				int sid = PyLong_AsLong(PyTuple_GET_ITEM(item, 2));
 				refs.push_back(eServiceReferenceDVB(0, tsid, onid, sid, 0));
 			}
 			else
@@ -2324,7 +2324,7 @@ void eEPGCache::importEvents(ePyObject serviceReferences, ePyObject list)
 		const char *title = getStringFromPython(PyTuple_GET_ITEM(singleEvent, 2));
 		const char *short_summary = getStringFromPython(PyTuple_GET_ITEM(singleEvent, 3));
 		const char *long_description = getStringFromPython(PyTuple_GET_ITEM(singleEvent, 4));
-		char event_type = (char) PyInt_AsLong(PyTuple_GET_ITEM(singleEvent, 5));
+		char event_type = (char) PyLong_AsLong(PyTuple_GET_ITEM(singleEvent, 5));
 
 		Py_BEGIN_ALLOW_THREADS;
 		submitEventData(refs, start, duration, title, short_summary, long_description, event_type);
