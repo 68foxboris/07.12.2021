@@ -252,11 +252,7 @@ inline ePyObject Impl_PyUnicode_FromString(const char* file, int line, const cha
 
 inline ePyObject Impl_PyLong_FromLong(const char* file, int line, long val)
 {
-#if PY_MAJOR_VERSION >= 3
 	return ePyObject(PyLong_FromLong(val), file, line);
-#else
-	return ePyObject(PyLong_FromLong(val), file, line);
-#endif
 }
 
 inline ePyObject Impl_PyLong_FromLong(const char* file, int line, long val)
@@ -329,11 +325,7 @@ inline ePyObject Impl_PyString_FromFormat(const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
-#if PY_MAJOR_VERSION >= 3
 	PyObject *ob = PyUnicode_FromFormatV(fmt, ap);
-#else
-	PyObject *ob = PyString_FromFormatV(fmt, ap);
-#endif
 	va_end(ap);
 	return ePyObject(ob);
 }
