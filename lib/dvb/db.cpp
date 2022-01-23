@@ -252,7 +252,7 @@ int eDVBService::isPlayable(const eServiceReference &ref, const eServiceReferenc
 				PyObject *pName, *pModule, *pFunc;
 				PyObject *pArgs, *pArg, *pResult;
 				Py_Initialize();
-				pName = PyString_FromString("Tools.CIHelper");
+				pName = PyUnicode_FromString("Tools.CIHelper");
 				pModule = PyImport_Import(pName);
 				Py_DECREF(pName);
 				if (pModule != NULL)
@@ -261,7 +261,7 @@ int eDVBService::isPlayable(const eServiceReference &ref, const eServiceReferenc
 					if (pFunc) 
 					{
 						pArgs = PyTuple_New(1);
-						pArg = PyString_FromString(ref.toString().c_str());
+						pArg = PyUnicode_FromString(ref.toString().c_str());
 						PyTuple_SetItem(pArgs, 0, pArg);
 						pResult = PyObject_CallObject(pFunc, pArgs);
 						Py_DECREF(pArgs);
@@ -1372,7 +1372,7 @@ PyObject *eDVBDB::readSatellites(ePyObject sat_list, ePyObject sat_dict, ePyObje
 			std::string name((const char*)attr->name);
 			if (name == "name")
 			{
-				sat_name = PyString_FromString((const char*)attr->children->content);
+				sat_name = PyUnicode_FromString((const char*)attr->children->content);
 			}
 			else if (name == "flags")
 			{
@@ -1561,7 +1561,7 @@ PyObject *eDVBDB::readCables(ePyObject cab_list, ePyObject tp_dict)
 		{
 			std::string name((const char*)attr->name);
 			if (name == "name")
-				cab_name = PyString_FromString((const char*)attr->children->content);
+				cab_name = PyUnicode_FromString((const char*)attr->children->content);
 			else if (name == "flags")
 			{
 				tmp = strtol((const char*)attr->children->content, &end_ptr, 10);
@@ -1570,7 +1570,7 @@ PyObject *eDVBDB::readCables(ePyObject cab_list, ePyObject tp_dict)
 			}
 			else if (name == "countrycode")
 			{
-				cab_countrycode = PyString_FromString((const char*)attr->children->content);
+				cab_countrycode = PyUnicode_FromString((const char*)attr->children->content);
 			}
 		}
 
@@ -1581,7 +1581,7 @@ PyObject *eDVBDB::readCables(ePyObject cab_list, ePyObject tp_dict)
 			if (!cab_flags)
 				cab_flags = PyLong_FromLong(0);
 			if (!cab_countrycode)
-				cab_countrycode = PyString_FromString("");
+				cab_countrycode = PyUnicode_FromString("");
 			PyTuple_SET_ITEM(tuple, 0, cab_name);
 			PyTuple_SET_ITEM(tuple, 1, cab_flags);
 			PyTuple_SET_ITEM(tuple, 2, cab_countrycode);
@@ -1714,7 +1714,7 @@ PyObject *eDVBDB::readTerrestrials(ePyObject ter_list, ePyObject tp_dict)
 			std::string name((const char*)attr->name);
 			if (name == "name")
 			{
-				ter_name = PyString_FromString((const char*)attr->children->content);
+				ter_name = PyUnicode_FromString((const char*)attr->children->content);
 			}
 			else if (name == "flags")
 			{
@@ -1726,7 +1726,7 @@ PyObject *eDVBDB::readTerrestrials(ePyObject ter_list, ePyObject tp_dict)
 			}
 			else if (name == "countrycode")
 			{
-				ter_countrycode = PyString_FromString((const char*)attr->children->content);
+				ter_countrycode = PyUnicode_FromString((const char*)attr->children->content);
 			}
 		}
 
@@ -1737,7 +1737,7 @@ PyObject *eDVBDB::readTerrestrials(ePyObject ter_list, ePyObject tp_dict)
 			if (!ter_flags)
 				ter_flags = PyLong_FromLong(0);
 			if (!ter_countrycode)
-				ter_countrycode = PyString_FromString("");
+				ter_countrycode = PyUnicode_FromString("");
 			PyTuple_SET_ITEM(tuple, 0, ter_name);
 			PyTuple_SET_ITEM(tuple, 1, ter_flags);
 			PyTuple_SET_ITEM(tuple, 2, ter_countrycode);
@@ -1896,7 +1896,7 @@ PyObject *eDVBDB::readATSC(ePyObject atsc_list, ePyObject tp_dict)
 		{
 			std::string name((const char*)attr->name);
 			if (name == "name")
-				atsc_name = PyString_FromString((const char*)attr->children->content);
+				atsc_name = PyUnicode_FromString((const char*)attr->children->content);
 			else if (name == "flags")
 			{
 				tmp = strtol((const char*)attr->children->content, &end_ptr, 10);
