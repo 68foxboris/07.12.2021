@@ -325,15 +325,6 @@ inline ePyObject Impl_PyDict_New()
 	return PyDict_New();
 }
 
-inline ePyObject Impl_PyString_FromString(const char *str)
-{
-#if PY_MAJOR_VERSION >= 3
-	return PyUnicode_FromString(str);
-#else
-	return PyUnicode_FromString(str);
-#endif
-}
-
 inline ePyObject Impl_PyString_FromFormat(const char *fmt, ...)
 {
 	va_list ap;
