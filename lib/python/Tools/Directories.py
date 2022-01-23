@@ -364,7 +364,7 @@ def bestRecordingLocation(candidates):
 
 def getRecordingFilename(basename, dirname=None):
 	nonAllowedCharacters = "/.\\:*?<>|\""  # Filter out non-allowed characters.
-	basename = basename.replace("\xc2\x86", "").replace("\xc2\x87", "") if PY2 else basename.replace("\x86", "").replace("\x87", "")
+	basename = basename.replace("\x86", "").replace("\x87", "") if PY2 else basename.replace("\x86", "").replace("\x87", "")
 	filename = ""
 	for character in basename:
 		if character in nonAllowedCharacters or ord(character) < 32:

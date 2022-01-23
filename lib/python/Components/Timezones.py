@@ -161,9 +161,7 @@ class Timezones:
 		if fileDom:
 			for zone in fileDom.findall("zone"):
 				name = zone.get("name", "")
-				name = name.encode(encoding="UTF-8", errors="ignore") if PY2 else name
 				zonePath = zone.get("zone", "")
-				zonePath = zonePath.encode(encoding="UTF-8", errors="ignore") if PY2 else zonePath
 				if exists(pathjoin(TIMEZONE_DATA, zonePath)):
 					zones.append((zonePath, name))
 				else:
