@@ -1,5 +1,4 @@
 # fake-enigma
-from __future__ import print_function
 
 
 class slot:

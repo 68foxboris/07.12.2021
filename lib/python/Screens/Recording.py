@@ -1,4 +1,3 @@
-from __future__ import print_function
 from os import stat
 from os.path import isdir, join as pathjoin
 

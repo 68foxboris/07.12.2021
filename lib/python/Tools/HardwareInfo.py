@@ -1,4 +1,3 @@
-from __future__ import print_function
 from Components.SystemInfo import BoxInfo
 from Tools.Directories import fileReadLine
  

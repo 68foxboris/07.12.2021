@@ -1,4 +1,3 @@
-from __future__ import print_function
 from Screens.WizardLanguage import WizardLanguage
 from Screens.HelpMenu import ShowRemoteControl
 from Screens.MessageBox import MessageBox

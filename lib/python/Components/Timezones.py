@@ -1,4 +1,3 @@
-from __future__ import print_function
 from errno import ENOENT
 from os import environ, path, symlink, unlink, walk
 from os.path import exists, isfile, join as pathjoin, realpath

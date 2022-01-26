@@ -1,4 +1,4 @@
-from __future__ import print_function
+# -*- coding: UTF-8 -*-
 from errno import ENOENT, EXDEV
 from inspect import stack
 from os import F_OK, R_OK, W_OK, access, chmod, link, listdir, makedirs, mkdir, readlink, remove, rename, rmdir, sep, stat, statvfs, symlink, utime, walk

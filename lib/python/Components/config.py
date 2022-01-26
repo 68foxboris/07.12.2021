@@ -1,4 +1,3 @@
-from __future__ import print_function
 from enigma import getPrevAsciiCode
 from Components.SystemInfo import BoxInfo
 from Tools.NumericalTextInput import NumericalTextInput
