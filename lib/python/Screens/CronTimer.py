@@ -12,7 +12,7 @@ from Screens.MessageBox import MessageBox
 from Tools.Directories import fileExists
 from os import system, listdir, rename, path, mkdir
 from time import sleep
-from six import PY3
+import six
 
 
 class CronTimers(Screen):
@@ -42,7 +42,7 @@ class CronTimers(Screen):
 
 		self['key_red'] = Label(_("Delete"))
 		self['key_green'] = Label(_("Add"))
-		self['key_yellow'] = Label(_("Start"))
+		self['key_yellow'] = StaticText(_("Start"))
 		self['key_blue'] = Label(_("Autostart"))
 		self.list = []
 		self['list'] = List(self.list)
@@ -53,11 +53,10 @@ class CronTimers(Screen):
 		self.onLayoutFinish.append(self.InstallCheck)
 
 	def InstallCheck(self):
-		self.Console.ePopen('opkg list_installed ' + self.service_name, self.checkNetworkState)
+		self.Console.ePopen('/usr/bin/opkg list_installed ' + self.service_name, self.checkNetworkState)
 
 	def checkNetworkState(self, str, retval, extra_args):
-		if PY3:
-			str = str.decode()
+		str = six.ensure_str(str)
 		if 'Collected errors' in str:
 			self.session.openWithCallback(self.close, MessageBox, _("Seems a background update check is in progress, please try again later."), type=MessageBox.TYPE_INFO, timeout=10, close_on_any_key=True)
 		elif not str:
@@ -77,7 +76,7 @@ class CronTimers(Screen):
 	def doInstall(self, callback, pkgname):
 		self.message = self.session.open(MessageBox, _("Please wait..."), MessageBox.TYPE_INFO, enable_input=False)
 		self.message.setTitle(_('Installing service'))
-		self.Console.ePopen('opkg install ' + pkgname, callback)
+		self.Console.ePopen('/usr/bin/opkg install ' + pkgname, callback)
 
 	def installComplete(self, result=None, retval=None, extra_args=None):
 		self.message.close()
@@ -85,11 +84,12 @@ class CronTimers(Screen):
 
 	def UninstallCheck(self):
 		if not self.my_crond_run:
-			self.Console.ePopen('opkg list_installed ' + self.service_name, self.RemovedataAvail)
+			self.Console.ePopen('/usr/bin/opkg list_installed ' + self.service_name, self.RemovedataAvail)
 		else:
 			self.close()
 
 	def RemovedataAvail(self, str, retval, extra_args):
+		str = six.ensure_str(str)
 		if str:
 			self.session.openWithCallback(self.RemovePackage, MessageBox, _('Ready to remove "%s" ?') % self.service_name)
 		else:
@@ -104,7 +104,7 @@ class CronTimers(Screen):
 	def doRemove(self, callback, pkgname):
 		self.message = self.session.open(MessageBox, _("Please wait..."), MessageBox.TYPE_INFO, enable_input=False)
 		self.message.setTitle(_('Removing service'))
-		self.Console.ePopen('opkg remove ' + pkgname + ' --force-remove --autoremove', callback)
+		self.Console.ePopen('/usr/bin/opkg remove ' + pkgname + ' --force-remove --autoremove', callback)
 
 	def removeComplete(self, result=None, retval=None, extra_args=None):
 		self.message.close()
@@ -313,16 +313,10 @@ class CronTimersConfig(Screen, ConfigListScreen):
 		ConfigListScreen.__init__(self, self.list, session=self.session, on_change=self.changedEntry)
 		self['key_red'] = Label(_("Close"))
 		self['key_green'] = Label(_("Save"))
-		self['actions'] = ActionMap(['WizardActions', 'ColorActions', "MenuActions"],
-		{
-			'red': self.close,
-			'green': self.checkentry,
-			'back': self.close,
-			'showVirtualKeyboard': self.keyText,
-		})
+		self['actions'] = ActionMap(['WizardActions', 'ColorActions', 'VirtualKeyboardActions', "MenuActions"], {'red': self.close, 'green': self.checkentry, 'back': self.close, 'showVirtualKeyboard': self.KeyText})
+		self["VKeyIcon"] = Boolean(False)
 		self["HelpWindow"] = Pixmap()
 		self["HelpWindow"].hide()
-		self["VKeyIcon"] = Boolean(False)
 		self.createSetup()
 
 	def createSetup(self):

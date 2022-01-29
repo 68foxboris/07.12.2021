@@ -284,14 +284,14 @@ class Devices(Screen):
 		self.onLayoutFinish.append(self.populate)
 
 	def populate(self):
-		self.mountinfo = ''
+		self.mountinfo = ""
 		self["actions"].setEnabled(False)
 		scanning = _("Please wait while scanning for devices...")
 		self["nims"].setText(scanning)
 		for count in (0, 1, 2, 3):
 			self["Tuner" + str(count)].setText(scanning)
 		self["hdd"].setText(scanning)
-		self['mounts'].setText(scanning)
+		self["mounts"].setText(scanning)
 		self.activityTimer.start(1)
 
 	def populate2(self):
@@ -306,7 +306,7 @@ class Devices(Screen):
 		self["nims"].setText(niminfo)
 
 		nims = nimmanager.nimList()
-		if len(nims) <= 4 :
+		if len(nims) <= 4:
 			for count in (0, 1, 2, 3):
 				if count < len(nims):
 					self["Tuner" + str(count)].setText(nims[count])
@@ -318,25 +318,25 @@ class Devices(Screen):
 			cur_idx = -1
 			while count < len(nims):
 				data = nims[count].split(":")
-				idx = data[0].strip('Tuner').strip()
+				idx = data[0].strip("Tuner").strip()
 				desc = data[1].strip()
-				if desc_list and desc_list[cur_idx]['desc'] == desc:
-					desc_list[cur_idx]['end'] = idx
+				if desc_list and desc_list[cur_idx]["desc"] == desc:
+					desc_list[cur_idx]["end"] = idx
 				else:
 					desc_list.append({
-						'desc': desc,
-						'start': idx,
-						'end': idx
+						"desc": desc,
+						"start": idx,
+						"end": idx
 					})
 					cur_idx += 1
 				count += 1
 
 			for count in (0, 1, 2, 3):
 				if count < len(desc_list):
-					if desc_list[count]['start'] == desc_list[count]['end']:
-						text = "Tuner %s: %s" % (desc_list[count]['start'], desc_list[count]['desc'])
+					if desc_list[count]["start"] == desc_list[count]["end"]:
+						text = "Tuner %s: %s" % (desc_list[count]["start"], desc_list[count]["desc"])
 					else:
-						text = "Tuner %s-%s: %s" % (desc_list[count]['start'], desc_list[count]['end'], desc_list[count]['desc'])
+						text = "Tuner %s-%s: %s" % (desc_list[count]["start"], desc_list[count]["end"], desc_list[count]["desc"])
 				else:
 					text = ""
 
@@ -345,12 +345,13 @@ class Devices(Screen):
 		self.hddlist = harddiskmanager.HDDList()
 		self.list = []
 		if self.hddlist:
+			print("[About] hddlist = %s" % (self.hddlist))
 			for count in range(len(self.hddlist)):
 				hdd = self.hddlist[count][1]
 				hddp = self.hddlist[count][0]
 				if "ATA" in hddp:
-					hddp = hddp.replace('ATA', '')
-					hddp = hddp.replace('Internal', 'ATA Bus ')
+					hddp = hddp.replace("ATA", "")
+					hddp = hddp.replace("Internal", "ATA Bus ")
 				free = hdd.Totalfree()
 				if ((float(free) / 1024) / 1024) >= 1:
 					freeline = _("Free: ") + str(round(((float(free) / 1024) / 1024), 2)) + _("TB")
@@ -364,20 +365,18 @@ class Devices(Screen):
 					freeline = _("Free: ") + _("full")
 				line = "%s      %s" %(hddp, freeline)
 				self.list.append(line)
-		self.list = '\n'.join(self.list)
+		self.list = "\n".join(self.list)
 		self["hdd"].setText(self.list)
 
 		self.Console.ePopen("df -mh | grep -v '^Filesystem'", self.Stage1Complete)
 
 	def Stage1Complete(self, result, retval, extra_args=None):
-		if PY2:
-			result = result.replace('\n                        ', ' ').split('\n')
-		else:
-			result = result.replace('\n                        ', ' ').split('\n')
+		result = six.ensure_str(result)
+		result = result.replace("\n                        ", " ").split("\n")
 		self.mountinfo = ""
 		for line in result:
 			self.parts = line.split()
-			if line and self.parts[0] and (self.parts[0].startswith('192') or self.parts[0].startswith('//192')):
+			if line and self.parts[0] and (self.parts[0].startswith("192") or self.parts[0].startswith("//192")):
 				line = line.split()
 				ipaddress = line[0]
 				mounttotal = line[1]
@@ -393,7 +392,7 @@ class Devices(Screen):
 		if self.mountinfo:
 			self["mounts"].setText(self.mountinfo)
 		else:
-			self["mounts"].setText(_('none'))
+			self["mounts"].setText(_("none"))
 		self["actions"].setEnabled(True)
 
 
@@ -450,50 +449,50 @@ class SystemNetworkInfo(Screen):
 	def createscreen(self):
 		self.AboutText = ""
 		self.iface = "eth0"
-		eth0 = about.getIfConfig('eth0')
-		if 'addr' in eth0:
-			self.AboutText += _("IP:") + "\t" + "\t" + eth0['addr'] + "\n"
-			if 'netmask' in eth0:
-				self.AboutText += _("Netmask:") + "\t" + eth0['netmask'] + "\n"
-			if 'hwaddr' in eth0:
-				self.AboutText += _("MAC:") + "\t" + "\t" + eth0['hwaddr'] + "\n"
-			self.iface = 'eth0'
+		eth0 = about.getIfConfig("eth0")
+		if "addr" in eth0:
+			self.AboutText += _("IP:") + "\t" + eth0["addr"] + "\n"
+			if "netmask" in eth0:
+				self.AboutText += _("Netmask:") + "\t" + eth0["netmask"] + "\n"
+			if "hwaddr" in eth0:
+				self.AboutText += _("MAC:") + "\t" + eth0["hwaddr"] + "\n"
+			self.iface = "eth0"
 
-		eth1 = about.getIfConfig('eth1')
-		if 'addr' in eth1:
-			self.AboutText += _("IP:") + "\t" + "\t" + eth1['addr'] + "\n"
-			if 'netmask' in eth1:
-				self.AboutText += _("Netmask:") + "\t" + eth1['netmask'] + "\n"
-			if 'hwaddr' in eth1:
-				self.AboutText += _("MAC:") + "\t" + "\t" + eth1['hwaddr'] + "\n"
-			self.iface = 'eth1'
+		eth1 = about.getIfConfig("eth1")
+		if "addr" in eth1:
+			self.AboutText += _("IP:") + "\t" + eth1["addr"] + "\n"
+			if "netmask" in eth1:
+				self.AboutText += _("Netmask:") + "\t" + eth1["netmask"] + "\n"
+			if "hwaddr" in eth1:
+				self.AboutText += _("MAC:") + "\t" + eth1["hwaddr"] + "\n"
+			self.iface = "eth1"
 
-		ra0 = about.getIfConfig('ra0')
-		if 'addr' in ra0:
-			self.AboutText += _("IP:") + "\t" + "\t" + ra0['addr'] + "\n"
-			if 'netmask' in ra0:
-				self.AboutText += _("Netmask:") + "\t" + ra0['netmask'] + "\n"
-			if 'hwaddr' in ra0:
-				self.AboutText += _("MAC:") + "\t" + "\t" + ra0['hwaddr'] + "\n"
-			self.iface = 'ra0'
+		ra0 = about.getIfConfig("ra0")
+		if "addr" in ra0:
+			self.AboutText += _("IP:") + "\t" + ra0["addr"] + "\n"
+			if "netmask" in ra0:
+				self.AboutText += _("Netmask:") + "\t" + ra0["netmask"] + "\n"
+			if "hwaddr" in ra0:
+				self.AboutText += _("MAC:") + "\t" + ra0["hwaddr"] + "\n"
+			self.iface = "ra0"
 
-		wlan0 = about.getIfConfig('wlan0')
-		if 'addr' in wlan0:
-			self.AboutText += _("IP:") + "\t" + "\t" + wlan0['addr'] + "\n"
-			if 'netmask' in wlan0:
-				self.AboutText += _("Netmask:") + "\t" + wlan0['netmask'] + "\n"
-			if 'hwaddr' in wlan0:
-				self.AboutText += _("MAC:") + "\t" + "\t" + wlan0['hwaddr'] + "\n"
-			self.iface = 'wlan0'
+		wlan0 = about.getIfConfig("wlan0")
+		if "addr" in wlan0:
+			self.AboutText += _("IP:") + "\t" + wlan0["addr"] + "\n"
+			if "netmask" in wlan0:
+				self.AboutText += _("Netmask:") + "\t" + wlan0["netmask"] + "\n"
+			if "hwaddr" in wlan0:
+				self.AboutText += _("MAC:") + "\t" + wlan0["hwaddr"] + "\n"
+			self.iface = "wlan0"
 
-		wlan3 = about.getIfConfig('wlan3')
-		if 'addr' in wlan3:
-			self.AboutText += _("IP:") + "\t" + "\t" + wlan3['addr'] + "\n"
-			if 'netmask' in wlan3:
-				self.AboutText += _("Netmask:") + "\t" + wlan3['netmask'] + "\n"
-			if 'hwaddr' in wlan3:
-				self.AboutText += _("MAC:") + "\t" + "\t" + wlan3['hwaddr'] + "\n"
-			self.iface = 'wlan3'
+		wlan3 = about.getIfConfig("wlan3")
+		if "addr" in wlan3:
+			self.AboutText += _("IP:") + "\t" + wlan3["addr"] + "\n"
+			if "netmask" in wlan3:
+				self.AboutText += _("Netmask:") + "\t" + wlan3["netmask"] + "\n"
+			if "hwaddr" in wlan3:
+				self.AboutText += _("MAC:") + "\t" + wlan3["hwaddr"] + "\n"
+			self.iface = "wlan3"
 
 		rx_bytes, tx_bytes = about.getIfTransferredData(self.iface)
 		self.AboutText += "\n" + _("Bytes received:") + "\t" + rx_bytes + "\n"
@@ -563,7 +562,7 @@ class SystemNetworkInfo(Screen):
 # if there is no info for them, so we need to check that possibility
 # for each status[self.iface] field...
 #
-				if self.iface == 'wlan0' or self.iface == 'wlan3' or self.iface == 'ra0':
+				if self.iface == "wlan0" or self.iface == "wlan3" or self.iface == "ra0":
 # accesspoint is used in the "enc" code too, so we get it regardless
 #
 					if not status[self.iface]["accesspoint"]:
@@ -574,10 +573,10 @@ class SystemNetworkInfo(Screen):
 							essid = _("No connection")
 						else:
 							accesspoint = status[self.iface]["accesspoint"]
-					if 'BSSID' in self:
-						self.AboutText += _('Accesspoint:') + '\t' + accesspoint + '\n'
+					if "BSSID" in self:
+						self.AboutText += _("Accesspoint:") + '\t' + accesspoint + "\n"
 
-					if 'ESSID' in self:
+					if "ESSID" in self:
 						if not status[self.iface]["essid"]:
 							essid = _("Unknown")
 						else:
@@ -585,33 +584,33 @@ class SystemNetworkInfo(Screen):
 								essid = _("No connection")
 							else:
 								essid = status[self.iface]["essid"]
-						self.AboutText += _('SSID:') + '\t' + essid + '\n'
+						self.AboutText += _("SSID:") + "\t" + essid + "\n"
 
-					if 'quality' in self:
+					if "quality" in self:
 						if not status[self.iface]["quality"]:
 							quality = _("Unknown")
 						else:
 							quality = status[self.iface]["quality"]
-						self.AboutText += _('Link quality:') + '\t' + quality + '\n'
+						self.AboutText += _("Link quality:") + "\t" + quality + "\n"
 
-					if 'bitrate' in self:
+					if "bitrate" in self:
 						if not status[self.iface]["bitrate"]:
 							bitrate = _("Unknown")
 						else:
-							if status[self.iface]["bitrate"] == '0':
+							if status[self.iface]["bitrate"] == "0":
 								bitrate = _("Unsupported")
 							else:
 								bitrate = str(status[self.iface]["bitrate"]) + " Mb/s"
-						self.AboutText += _('Bitrate:') + '\t' + bitrate + '\n'
+						self.AboutText += _("Bitrate:") + "\t" + bitrate + "\n"
 
-					if 'signal' in self:
+					if "signal" in self:
 						if not status[self.iface]["signal"]:
 							signal = _("Unknown")
 						else:
 							signal = status[self.iface]["signal"]
-						self.AboutText += _('Signal strength:') + '\t' + signal + '\n'
+						self.AboutText += _("Signal strength:") + "\t" + signal + "\n"
 
-					if 'enc' in self:
+					if "enc" in self:
 						if not status[self.iface]["encryption"]:
 							encryption = _("Unknown")
 						else:
@@ -622,7 +621,7 @@ class SystemNetworkInfo(Screen):
 									encryption = _("Unsupported")
 							else:
 								encryption = _("Enabled")
-						self.AboutText += _('Encryption:') + '\t' + encryption + '\n'
+						self.AboutText += _("Encryption:") + "\t" + encryption + "\n"
 
 					if ((status[self.iface]["essid"] and status[self.iface]["essid"] == "off") or
 						not status[self.iface]["accesspoint"] or
@@ -659,7 +658,7 @@ class SystemNetworkInfo(Screen):
 		self.LinkState = None
 		for line in data.splitlines():
 			line = line.strip()
-			if 'Link detected:' in line:
+			if "Link detected:" in line:
 				if "yes" in line:
 					self.LinkState = True
 				else:
@@ -709,35 +708,35 @@ class SystemMemoryInfo(Screen):
 			tstLine = out_lines[lidx].split()
 			if "MemTotal:" in tstLine:
 				MemTotal = out_lines[lidx].split()
-				self.AboutText += _("Total memory:") + "\t" + "\t" + MemTotal[1] + "\n"
+				self.AboutText += _("Total memory:") + "\t" + MemTotal[1] + "\n"
 			if "MemFree:" in tstLine:
 				MemFree = out_lines[lidx].split()
-				self.AboutText += _("Free memory:") + "\t" + "\t" + MemFree[1] + "\n"
+				self.AboutText += _("Free memory:") + "\t" + MemFree[1] + "\n"
 			if "Buffers:" in tstLine:
 				Buffers = out_lines[lidx].split()
-				self.AboutText += _("Buffers:") + "\t" + "\t" + Buffers[1] + "\n"
+				self.AboutText += _("Buffers:") + "\t" + Buffers[1] + "\n"
 			if "Cached:" in tstLine:
 				Cached = out_lines[lidx].split()
-				self.AboutText += _("Cached:") + "\t" + "\t" + Cached[1] + "\n"
+				self.AboutText += _("Cached:") + "\t" + Cached[1] + "\n"
 			if "SwapTotal:" in tstLine:
 				SwapTotal = out_lines[lidx].split()
-				self.AboutText += _("Total swap:") + "\t" + "\t" + SwapTotal[1] + "\n"
+				self.AboutText += _("Total swap:") + "\t" + SwapTotal[1] + "\n"
 			if "SwapFree:" in tstLine:
 				SwapFree = out_lines[lidx].split()
-				self.AboutText += _("Free swap:") + "\t" + "\t" + SwapFree[1] + "\n\n"
+				self.AboutText += _("Free swap:") + "\t" + SwapFree[1] + "\n\n"
 
 		self["actions"].setEnabled(False)
 		self.Console = Console()
 		self.Console.ePopen("df -mh / | grep -v '^Filesystem'", self.Stage1Complete2)
 
 	def Stage1Complete2(self, result, retval, extra_args=None):
-		flash = str(result).replace('\n', '')
+		flash = str(result).replace("\n", "")
 		flash = flash.split()
 		RamTotal = flash[1]
 		RamFree = flash[3]
 
-		self.AboutText += _("Total:") + "\t" + "\t" + RamTotal + "\n"
-		self.AboutText += _("Free:") + "\t" + "\t" + RamFree + "\n\n"
+		self.AboutText += _("Total:") + "\t" + RamTotal + "\n"
+		self.AboutText += _("Free:") + "\t" + RamFree + "\n\n"
 
 		self["AboutScrollLabel"].setText(self.AboutText)
 		self["actions"].setEnabled(True)
@@ -758,7 +757,7 @@ class TranslationInfo(Screen):
 		infolines = _("").split("\n")
 		infomap = {}
 		for x in infolines:
-			data = x.split(': ')
+			data = x.split(": ")
 			if len(data) != 2:
 				continue
 			(type, value) = data
@@ -828,9 +827,9 @@ class CommitInfo(Screen):
 		from datetime import datetime
 		from json import loads
 		try:
-			commitlog += 80 * '-' + '\n'
-			commitlog += url.split('/')[-2] + '\n'
-			commitlog += 80 * '-' + '\n'
+			commitlog += 80 * "-" + "\n"
+			commitlog += url.split("/")[-2] + "\n"
+			commitlog += 80 * "-" + "\n"
 			try:
 				# OpenPli 5.0 uses python 2.7.11 and here we need to bypass the certificate check
 				from ssl import _create_unverified_context
@@ -844,10 +843,10 @@ class CommitInfo(Screen):
 				else:
 					log = loads(urllib.request.urlopen(url, timeout=5).read())
 			for c in log:
-				creator = c['commit']['author']['name']
-				title = c['commit']['message']
-				date = datetime.strptime(c['commit']['committer']['date'], '%Y-%m-%dT%H:%M:%SZ').strftime('%x %X')
-				commitlog += date + ' ' + creator + '\n' + title + 2 * '\n'
+				creator = c["commit"]["author"]["name"]
+				title = c["commit"]["message"]
+				date = datetime.strptime(c["commit"]["committer"]["date"], "%Y-%m-%dT%H:%M:%SZ").strftime("%x %X")
+				commitlog += date + " " + creator + "\n" + title + 2 * "\n"
 			self.cachedProjects[self.projects[self.project][1]] = commitlog
 		except Exception as err:
 			commitlog += _("Currently the commit log cannot be retrieved - please try later again")
