@@ -2,7 +2,6 @@ import os
 import time
 import pickle
 from Plugins.Plugin import PluginDescriptor
-from Screens.Console import Console
 from Screens.ChoiceBox import ChoiceBox
 from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
@@ -24,14 +23,13 @@ from Components.ConfigList import ConfigListScreen
 from Components.Console import Console
 from Components.SelectionList import SelectionList
 from Components.PluginComponent import plugins
-from Components.About import about
 from Components.PackageInfo import PackageInfoHandler
 from Components.Language import language
 from Components.AVSwitch import AVSwitch
 from Tools.Directories import resolveFilename, SCOPE_PLUGINS, SCOPE_PLUGIN, SCOPE_GUISKIN, SCOPE_METADIR
 from Tools.LoadPixmap import LoadPixmap
 from Tools.NumericalTextInput import NumericalTextInput
-from enigma import RT_HALIGN_LEFT, RT_VALIGN_CENTER, eListbox, gFont, getDesktop, ePicLoad, eRCInput, getPrevAsciiCode, eEnv
+from enigma import ePicLoad, eRCInput, getPrevAsciiCode, eEnv
 from twisted.web import client
 from Plugins.SystemPlugins.SoftwareManager.BackupRestore import BackupSelection, RestoreMenu, BackupScreen, RestoreScreen, getBackupPath, getBackupFilename
 from Plugins.SystemPlugins.SoftwareManager.SoftwareTools import iSoftwareTools
@@ -1187,23 +1185,24 @@ class PluginDetails(Screen, PackageInfoHandler):
 		pass
 
 	def setInfos(self):
-		if "screenshot" in self.attributes:
-			self.loadThumbnail(self.attributes)
+		if self.attributes:
+			if "screenshot" in self.attributes:
+				self.loadThumbnail(self.attributes)
 
-		if "name" in self.attributes:
-			self.pluginname = self.attributes["name"]
-		else:
-			self.pluginname = _("unknown")
+			if "name" in self.attributes:
+				self.pluginname = self.attributes["name"]
+			else:
+				self.pluginname = _("unknown")
 
-		if "author" in self.attributes:
-			self.author = self.attributes["author"]
-		else:
-			self.author = _("unknown")
+			if "author" in self.attributes:
+				self.author = self.attributes["author"]
+			else:
+				self.author = _("unknown")
 
-		if "description" in self.attributes:
-			self.description = _(self.attributes["description"].replace("\\n", "\n"))
-		else:
-			self.description = _("No description available.")
+			if "description" in self.attributes:
+				self.description = _(self.attributes["description"].replace("\\n", "\n"))
+			else:
+				self.description = _("No description available.")
 
 		self["author"].setText(_("Author: ") + self.author)
 		self["detailtext"].setText(_(self.description))
@@ -1259,10 +1258,11 @@ class PluginDetails(Screen, PackageInfoHandler):
 			self.setThumbnail(noScreenshot=True)
 
 	def go(self):
-		if "package" in self.attributes:
-			self.packagefiles = self.attributes["package"]
-		if "needsRestart" in self.attributes:
-			self.restartRequired = True
+		if self.attributes:
+			if "package" in self.attributes:
+				self.packagefiles = self.attributes["package"]
+			if "needsRestart" in self.attributes:
+				self.restartRequired = True
 		self.cmdList = []
 		if self.pluginstate in ('installed', 'remove'):
 			if self.packagefiles:
@@ -1337,12 +1337,12 @@ class OPKGMenu(Screen):
 		self["actions"] = NumberActionMap(["SetupActions"],
 		{
 			"ok": self.KeyOk,
-			"cancel": self.keyCancel
+			"cancel": self.close
 		}, -1)
 
 		self["shortcuts"] = ActionMap(["ShortcutActions"],
 		{
-			"red": self.keyCancel,
+			"red": self.close,
 			"green": self.KeyOk,
 		})
 		self["filelist"] = MenuList([])
@@ -1351,7 +1351,7 @@ class OPKGMenu(Screen):
 	def fill_list(self):
 		flist = []
 		self.path = '/etc/opkg/'
-		if os.path.exists(self.path):
+		if not os.path.exists(self.path):
 			self.entry = False
 			return
 		for file in os.listdir(self.path):
@@ -1366,12 +1366,6 @@ class OPKGMenu(Screen):
 			self.sel = self["filelist"].getCurrent()
 			self.val = self.path + self.sel
 			self.session.open(OPKGSource, self.val)
-
-	def keyCancel(self):
-		self.close()
-
-	def Exit(self):
-		self.close()
 
 
 class OPKGSource(Screen):
@@ -1391,7 +1385,7 @@ class OPKGSource(Screen):
 		text = ""
 		if self.configfile:
 			try:
-				fp = open(configfile, 'r')
+				fp = open(self.configfile, 'r')
 				sources = fp.readlines()
 				if sources:
 					text = sources[0]
@@ -1399,17 +1393,10 @@ class OPKGSource(Screen):
 			except IOError:
 				pass
 
-		desk = getDesktop(0)
-		x = int(desk.size().width())
-		y = int(desk.size().height())
-
 		self["key_red"] = StaticText(_("Cancel"))
 		self["key_green"] = StaticText(_("Save"))
 
-		if (y >= 720):
-			self["text"] = Input(text, maxSize=False, type=Input.TEXT)
-		else:
-			self["text"] = Input(text, maxSize=False, visible_width=55, type=Input.TEXT)
+		self["text"] = Input(text, maxSize=False, type=Input.TEXT)
 
 		self["actions"] = NumberActionMap(["WizardActions", "InputActions", "TextEntryActions", "KeyboardInputActions", "ShortcutActions"],
 		{
@@ -1442,11 +1429,10 @@ class OPKGSource(Screen):
 
 	def go(self):
 		text = self["text"].getText()
-		if text:
-			fp = open(self.configfile, 'w')
-			fp.write(text)
-			fp.write("\n")
-			fp.close()
+		if text and self.configfile:
+			with open(self.configfile, 'w') as fp:
+				fp.write(text)
+				fp.write("\n")
 		self.close()
 
 	def keyLeft(self):
@@ -1499,7 +1485,7 @@ class PacketManager(Screen, NumericalTextInput):
 		self.setTitle(_("Packet manager"))
 		self.skin_path = plugin_path
 
-		self.setUseableChars(u'1234567890abcdefghijklmnopqrstuvwxyz')
+		self.setUseableChars('1234567890abcdefghijklmnopqrstuvwxyz')
 
 		self["shortcuts"] = NumberActionMap(["ShortcutActions", "WizardActions", "NumberActions", "InputActions", "InputAsciiActions", "KeyboardInputActions"],
 		{
