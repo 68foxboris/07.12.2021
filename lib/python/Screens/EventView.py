@@ -325,7 +325,7 @@ class EventViewBase:
 				self.session.openWithCallback(boxAction, ChoiceBox, title=text, list=menu, windowTitle=_("Event view context menu"))
 
 	def runPlugin(self, plugin):
-		plugin(session=self.session, service=self.currentService, event=self.event, eventName=self.event.getEventName())
+		plugin.__call__(session=self.session, service=self.currentService, event=self.event, eventName=self.event.getEventName())
 
 
 class EventViewSimple(Screen, EventViewBase):
