@@ -402,7 +402,7 @@ void eDVBServicePMTHandler::AITready(int error)
 				if(!hbbtvUrl.empty())
 				{
 					const char* uu = hbbtvUrl.c_str();
-					struct aitInfo aitinfo;
+					struct aitInfo aitinfo = {};
 					aitinfo.id = appid;
 					aitinfo.name = applicationName;
 					aitinfo.url = hbbtvUrl;
@@ -820,7 +820,7 @@ int eDVBServicePMTHandler::getProgramInfo(program &program)
 			vpidtype = videoStream::vtMPEG2;
 		if ( cached_vpid != -1 )
 		{
-			videoStream s;
+			videoStream s = {};
 			s.pid = cached_vpid;
 			s.type = vpidtype;
 			program.videoStreams.push_back(s);
@@ -831,7 +831,7 @@ int eDVBServicePMTHandler::getProgramInfo(program &program)
 			eDVBService::cacheID cTag = audioMapList[m].cacheTag;
 			if (cached_apid[cTag] != -1)
 			{
-				audioStream s;
+				audioStream s = {};
 				s.type = audioMapList[m].streamType;
 				s.pid = cached_apid[cTag];
 				s.rdsPid = -1;
