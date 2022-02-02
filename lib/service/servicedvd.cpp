@@ -111,7 +111,7 @@ int eStaticServiceDVDInfo::getInfo(const eServiceReference &ref, int w)
 	{
 	case iServiceInformation::sTimeCreate:
 		{
-			struct stat s;
+			struct stat s = {};
 			if (stat(ref.path.c_str(), &s) == 0)
 				return s.st_mtime;
 		}
@@ -122,7 +122,7 @@ int eStaticServiceDVDInfo::getInfo(const eServiceReference &ref, int w)
 
 long long eStaticServiceDVDInfo::getFileSize(const eServiceReference &ref)
 {
-	struct stat s;
+	struct stat s = {};
 	if (stat(ref.path.c_str(), &s) == 0)
 		return s.st_size;
 	return 0;
