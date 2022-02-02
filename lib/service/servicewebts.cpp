@@ -115,7 +115,7 @@ int eStaticServiceWebTSInfo::getInfo(const eServiceReference &ref, int w)
 	{
 	case iServiceInformation::sTimeCreate:
 	{
-		struct stat s;
+		struct stat s = {};
 		if (!stat(ref.path.c_str(), &s))
 			return s.st_mtime;
 	}
