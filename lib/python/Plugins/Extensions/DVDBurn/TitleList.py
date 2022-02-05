@@ -109,7 +109,7 @@ class TitleList(Screen, HelpableScreen):
 		for job in job_manager.getPendingJobs():
 			print("[DVDBurn] type(job):", type(job))
 			print("[DVDBurn] Process.DVDJob:", Process.DVDJob)
-			if type(job) == Process.DVDJob:
+			if isinstance(job, Process.DVDJob):
 				self.backgroundJob = job
 				return
 		self.backgroundJob = None
