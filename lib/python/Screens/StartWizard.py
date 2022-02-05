@@ -135,7 +135,6 @@ class AutoInstallWizard(Screen):
 			self.appClosed(True)
 
 	def dataAvail(self, data):
-		data = data.decode()
 		self["AboutScrollLabel"].appendText(data)
 		self.logfile.write(data)
 
