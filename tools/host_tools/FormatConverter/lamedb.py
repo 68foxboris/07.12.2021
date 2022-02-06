@@ -49,9 +49,8 @@ class lamedb(datasource):
 					data = line.strip().split(":")
 					tsid = str(int(data[1], 16))
 					onid = str(int(data[2], 16))
-		satlist = sorted(sats.keys())
 
-		for sat in satlist:
+		for sat in sorted(sats.keys()):
 			print(sat)
 			self.addSat(sat, sat)
 			transponders = sats[sat]
