@@ -1271,7 +1271,7 @@ class InfoBarEPG:
 				self.session.open(EPGSelection, ref)
 
 	def runPlugin(self, plugin):
-		plugin.__call__(session=self.session, servicelist=self.servicelist)
+		plugin(session=self.session, servicelist=self.servicelist)
 
 	def showEventInfoPlugins(self):
 		pluginlist = self.getEPGPluginList()
@@ -2357,9 +2357,9 @@ class InfoBarPlugins:
 
 	def runPlugin(self, plugin):
 		if isinstance(self, InfoBarChannelSelection):
-			plugin.__call__(session=self.session, servicelist=self.servicelist)
+			plugin(session=self.session, servicelist=self.servicelist)
 		else:
-			plugin.__call__(session=self.session)
+			plugin(session=self.session)
 
 
 from Components.Task import job_manager
@@ -3630,7 +3630,7 @@ class InfoBarTeletextPlugin:
 		self.teletext_plugin = None
 
 		for p in plugins.getPlugins(PluginDescriptor.WHERE_TELETEXT):
-			self.teletext_plugin = p.__call__
+			self.teletext_plugin = p
 
 		if self.teletext_plugin is not None:
 			self["TeletextActions"] = HelpableActionMap(self, ["InfobarTeletextActions"], {
