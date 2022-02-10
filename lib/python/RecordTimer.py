@@ -688,7 +688,7 @@ class RecordTimer(Timer):
 		self.saveTimers()
 
 
-class RecordTimerEntry(TimerEntry, object):
+class RecordTimerEntry(TimerEntry):
 	# The following static methods and members are only in use when the box is in (soft) standby!
 	#
 	wasInStandby = False
