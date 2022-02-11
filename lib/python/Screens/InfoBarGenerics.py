@@ -579,7 +579,7 @@ class BufferIndicator(Screen):
 		return info and info.getInfo(iServiceInformation.sBuffer)
 
 
-class InfoBarBuffer():
+class InfoBarBuffer:
 	def __init__(self):
 		self.bufferScreen = self.session.instantiateDialog(BufferIndicator)
 		self.bufferScreen.hide()
@@ -1919,7 +1919,7 @@ class InfoBarShowMovies:
 # activated (currently time-shifting).
 
 
-class InfoBarTimeshift():
+class InfoBarTimeshift:
 	def __init__(self):
 		self["TimeshiftActions"] = HelpableActionMap(self, ["InfobarTimeshiftActions"], {
 			"timeshiftStart": (self.startTimeshift, _("Start timeshift")),  # The "YELLOW key".
