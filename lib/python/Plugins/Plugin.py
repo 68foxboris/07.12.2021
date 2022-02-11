@@ -90,8 +90,11 @@ class PluginDescriptor:
 		self.fnc = fnc
 
 	def __call__(self, *args, **kwargs):
-		if callable(self.fnc):
-			return self.fnc(*args, **kwargs)
+		try:
+			if callable(self.fnc):
+				return self.fnc(*args, **kwargs)
+		except RuntimeError as err:
+			print("Error Python Module '%s' '%s'" % (self.path, err))
 
 	def updateIcon(self, path):
 		self.path = path
