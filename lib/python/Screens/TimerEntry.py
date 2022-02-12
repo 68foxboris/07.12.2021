@@ -1,6 +1,5 @@
 from datetime import datetime
 from time import localtime, mktime, time, strftime
-import urllib
 
 from enigma import eEPGCache, iRecordableServicePtr
 
@@ -24,7 +23,6 @@ from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Screens.TagEditor import TagEditor
 from Screens.VirtualKeyBoard import VirtualKeyBoard
-from Tools.Alternatives import GetWithAlternative
 from Tools.FallbackTimer import FallbackTimerDirs
 
 

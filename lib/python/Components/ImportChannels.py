@@ -1,16 +1,17 @@
-import threading
 import os
 import shutil
 import tempfile
-from json import loads
-from enigma import eDVBDB, eEPGCache
-from Screens.MessageBox import MessageBox
-from Components.config import config, ConfigText
-from Tools.Notifications import AddNotificationWithID
+import threading
 from base64 import encodebytes
+from json import loads
+from time import sleep
+from urllib.error import URLError
 from urllib.parse import quote
 from urllib.request import Request, urlopen
-import xml.etree.ElementTree as et
+from xml.etree.ElementTree import fromstring
+from Components.config import config
+from Screens.MessageBox import MessageBox
+from Tools.Notifications import AddNotificationWithID
 
 settingfiles = ('lamedb', 'bouquets.', 'userbouquet.', 'blacklist', 'whitelist', 'alternatives.')
 
@@ -36,7 +37,17 @@ class ImportChannels:
 		request = Request(url)
 		if self.header:
 			request.add_header("Authorization", self.header)
-		return urlopen(request, timeout=timeout)
+		try:
+			result = urlopen(request, timeout=timeout)
+		except URLError as e:
+			if "[Errno -3]" in str(e.reason):
+				print("[Import Channels] Network is not up yet, delay 5 seconds")
+				# network not up yet
+				sleep(5)
+				return self.getUrl(url, timeout)
+			print("[Import Channels] URLError ", e)
+			raise(e)
+		return result
 
 	def getTerrestrialUrl(self):
 		url = config.usage.remote_fallback_dvb_t.value
@@ -46,7 +57,7 @@ class ImportChannels:
 		return self.getUrl("%s/web/settings" % self.getTerrestrialUrl()).read()
 
 	def getFallbackSettingsValue(self, settings, e2settingname):
-		root = et.fromstring(settings)
+		root = fromstring(settings)
 		for e2setting in root:
 			if e2settingname in e2setting[0].text:
 				return e2setting[1].text
@@ -66,13 +77,13 @@ class ImportChannels:
 		self.getTerrestrialRegion(settings)
 		self.tmp_dir = tempfile.mkdtemp(prefix="ImportChannels")
 		if "epg" in self.remote_fallback_import:
-			print("[ImportChannels] Writing epg.dat file on sever box")
+			print("[Import Channels] Writing epg.dat file on sever box")
 			try:
 				self.getUrl("%s/web/saveepg" % self.url, timeout=30).read()
 			except:
 				self.ImportChannelsDone(False, _("Error when writing epg.dat on server"))
 				return
-			print("[ImportChannels] Get EPG Location")
+			print("[Import Channels] Get EPG Location")
 			try:
 				epgdatfile = self.getFallbackSettingsValue(settings, "config.misc.epgcache_filename") or "/hdd/epg.dat"
 				try:
